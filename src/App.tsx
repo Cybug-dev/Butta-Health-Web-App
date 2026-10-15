@@ -3,32 +3,35 @@ import {
   AlertTriangle,
   ArrowRight,
   Bell,
-  CalendarDays,
+  Brain,
   Check,
-  ChevronDown,
   ChevronRight,
-  Clock3,
   Download,
+  Droplets,
   FileCheck2,
   FlaskConical,
   HeartPulse,
+  History,
   Info,
   Leaf,
   Lightbulb,
   LogOut,
+  Moon,
   Pill,
   Plus,
   Printer,
   Search,
   ShieldCheck,
-  Sun,
+  Stethoscope,
   UserRound,
+  Utensils,
   X,
 } from "lucide-react";
 import gsap from "gsap";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { companionTips, navItems, presets } from "./data";
 import { PublicExperience } from "./components/PublicExperience";
+import { AccountMenu } from "./components/AccountMenu";
 import { AnimatedSelect } from "./components/AnimatedSelect";
 import { ObservationComposer } from "./components/ObservationComposer";
 import { ApiError, buttaApi, setSessionExpiredHandler, type AppUser, type HealthProfile, type HealthProfileInput } from "./services/api";
@@ -682,6 +685,9 @@ function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut: () => 
 
         <main className="min-w-0 pb-28 lg:ml-64 lg:pb-0">
           <MobileTopbar
+            user={user}
+            onProfile={() => navigateView("profile")}
+            onSettings={() => navigateView("settings")}
             onSignOut={onSignOut}
             showInsightTrigger={showInsightRail}
             onOpenInsightRail={() => setInsightRailOpen(true)}
@@ -692,6 +698,8 @@ function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut: () => 
             setSearch={setSearch}
             onSearch={() => navigateView("timeline")}
             onProfile={() => navigateView("profile")}
+            onSettings={() => navigateView("settings")}
+            onSignOut={onSignOut}
           />
           <div className="min-h-[calc(100vh-72px)]">
             <section
@@ -718,6 +726,14 @@ function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut: () => 
                     onCheckIn={respondToDailyCheckIn}
                     loading={loading}
                     setActiveView={navigateView}
+                    search={search}
+                    setSearch={setSearch}
+                    onSearch={() => navigateView("timeline")}
+                    onQuickLog={(preset) => {
+                      setObservation(preset);
+                      setInputMode("Preset");
+                      navigateView("capture");
+                    }}
                   />
                 )}
                 {activeView === "profile" && (
@@ -822,15 +838,18 @@ function DashboardTopbar({
   setSearch,
   onSearch,
   onProfile,
+  onSettings,
+  onSignOut,
 }: {
   user: AppUser;
   search: string;
   setSearch: (value: string) => void;
   onSearch: () => void;
   onProfile: () => void;
+  onSettings: () => void;
+  onSignOut: () => void;
 }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
 
   return (
     <header className="sticky top-0 z-30 hidden h-[72px] items-center justify-between border-b border-line bg-white/95 px-8 backdrop-blur lg:flex">
@@ -862,16 +881,7 @@ function DashboardTopbar({
           <Bell size={20} />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rust ring-2 ring-white" />
         </button>
-        <button type="button" onClick={onProfile} className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-1.5 text-left transition hover:bg-well">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-teal text-sm font-extrabold text-white shadow-lift">
-            {initials}
-          </span>
-          <span className="min-w-0">
-            <span className="block max-w-40 truncate text-sm font-extrabold">Hello, {user.firstName}</span>
-            <span className="block text-xs font-semibold text-muted">View health profile</span>
-          </span>
-          <ChevronDown size={16} className="text-faint" />
-        </button>
+        <AccountMenu user={user} onProfile={onProfile} onSettings={onSettings} onSignOut={onSignOut} showName />
 
         {notificationsOpen && (
           <div className="absolute right-0 top-[54px] w-80 overflow-hidden rounded-lg border border-line bg-white shadow-float">
@@ -894,6 +904,22 @@ function DashboardTopbar({
   );
 }
 
+const quickAccess: { icon: typeof Plus; label: string; view: ViewId }[] = [
+  { icon: Plus, label: "Log event", view: "capture" },
+  { icon: History, label: "History", view: "timeline" },
+  { icon: Stethoscope, label: "Visit prep", view: "doctor-prep" },
+  { icon: UserRound, label: "Profile", view: "profile" },
+];
+
+const quickLogOptions: { icon: typeof Plus; label: string; preset: string }[] = [
+  { icon: Brain, label: "Headache", preset: presets[0] },
+  { icon: Activity, label: "Dizziness", preset: presets[1] },
+  { icon: Utensils, label: "Digestion", preset: presets[2] },
+  { icon: Pill, label: "Medication", preset: presets[3] },
+  { icon: Moon, label: "Sleep", preset: presets[4] },
+  { icon: Droplets, label: "Hydration", preset: presets[5] },
+];
+
 function DashboardView({
   user,
   profile,
@@ -905,6 +931,10 @@ function DashboardView({
   onCheckIn,
   loading,
   setActiveView,
+  search,
+  setSearch,
+  onSearch,
+  onQuickLog,
 }: {
   user: AppUser;
   profile: HealthProfile | null;
@@ -916,6 +946,10 @@ function DashboardView({
   onCheckIn: (notes: string) => Promise<void>;
   loading: boolean;
   setActiveView: (view: ViewId) => void;
+  search: string;
+  setSearch: (value: string) => void;
+  onSearch: () => void;
+  onQuickLog: (preset: string) => void;
 }) {
   const completion = dashboard?.profileCompletion ?? profileCompletion(user, profile);
   const latestRecord = dashboard?.latestEvent ?? records[0];
@@ -926,10 +960,6 @@ function DashboardView({
     return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
   }).length;
   const thisMonthRecords = dashboard?.eventsThisMonth ?? locallyCalculatedMonth;
-  const memberSinceValue = dashboard?.memberSince ?? user.createdAt;
-  const memberSince = memberSinceValue
-    ? new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(new Date(memberSinceValue))
-    : "Today";
   const locallyCalculatedDays = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -945,61 +975,134 @@ function DashboardView({
 
   return (
     <div className="dashboard-view">
-      <div className="dashboard-enter mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+      <div className="dashboard-enter mb-5 flex flex-col justify-between gap-1 sm:flex-row sm:items-end sm:gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">{getGreeting()}, {user.firstName}</h1>
-            <SunMark />
-          </div>
-          <p className="mt-1 text-base font-medium text-muted">Here is what is happening with your health story.</p>
+          <h1 className="text-2xl font-extrabold leading-tight sm:text-4xl">{getGreeting()}, {user.firstName}</h1>
+          <p className="mt-1 text-base font-medium text-muted">How are you feeling today?</p>
         </div>
-        <div className="shrink-0 text-left sm:text-right">
-          <p className="text-sm font-bold text-muted">
-            {new Intl.DateTimeFormat("en", { weekday: "long", month: "short", day: "numeric", year: "numeric" }).format(now)}
-          </p>
-          <span className="mt-2 inline-flex rounded-lg bg-teal/5 px-3 py-2 text-xs font-extrabold text-teal">
-            Small steps build a clearer history
-          </span>
-        </div>
+        <p className="hidden text-sm font-bold text-muted sm:block">
+          {new Intl.DateTimeFormat("en", { weekday: "long", month: "short", day: "numeric", year: "numeric" }).format(now)}
+        </p>
       </div>
+
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSearch();
+        }}
+        className="dashboard-enter relative mb-5 lg:hidden"
+      >
+        <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" size={18} />
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search your health events..."
+          aria-label="Search health events"
+          className="h-11 w-full rounded-lg border border-line bg-white pl-11 pr-4 text-sm text-ink outline-none transition placeholder:text-faint focus:border-teal focus:ring-2 focus:ring-teal/10"
+        />
+      </form>
 
       <div className="grid gap-5">
         <div className="min-w-0 space-y-5">
-          <section className="dashboard-enter grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <DashboardMetric
-              icon={UserRound}
-              label="Profile"
-              value={`${completion}%`}
-              detail="complete"
-              badge="Private"
-              progress={completion}
-              onClick={() => setActiveView("profile")}
+          <section className="dashboard-enter relative overflow-hidden rounded-lg bg-teal text-white shadow-lift">
+            <img src="/assets/butta-hero-wellness.png" alt="" className="image-fade-left absolute inset-y-0 right-0 h-full w-3/5 object-cover object-center" />
+            <div className="relative z-10 max-w-[62%] p-5 sm:max-w-[56%] sm:p-7">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/70">Quick log</p>
+              <h2 className="mt-2 font-serif text-2xl leading-tight sm:text-3xl">Not feeling well?</h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/85">Describe it in your own words. You review everything before it is saved.</p>
+              <button type="button" onClick={() => setActiveView("capture")} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-4 text-sm font-extrabold text-teal transition hover:bg-well">
+                <Plus size={17} />
+                Log how I feel
+              </button>
+            </div>
+          </section>
+
+          <div className="dashboard-enter grid gap-5 lg:grid-cols-2">
+            <div className="min-w-0 space-y-5">
+              <section>
+                <h2 className="text-base font-extrabold">Quick access</h2>
+                <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-3">
+                  {quickAccess.map(({ icon: Icon, label, view }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setActiveView(view)}
+                      className="surface-card flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 py-3 text-center transition hover:-translate-y-0.5 hover:border-teal/30 hover:shadow-lift"
+                    >
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal"><Icon size={19} /></span>
+                      <span className="w-full truncate px-0.5 text-xs font-extrabold">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="text-base font-extrabold">Quick log</h2>
+                  <span className="text-xs font-semibold text-faint">Tap to start an entry</span>
+                </div>
+                <div className="scroll-row -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+                  {quickLogOptions.map(({ icon: Icon, label, preset }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => onQuickLog(preset)}
+                      className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border border-line bg-white px-3.5 text-sm font-bold text-ink transition hover:border-teal/40 hover:text-teal"
+                    >
+                      <Icon size={16} className="text-teal" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <DailyCheckInCard
+              checkIn={checkIn}
+              loading={loading}
+              saving={checkInSaving}
+              error={checkInError}
+              onSubmit={onCheckIn}
+              onViewHistory={() => setActiveView("timeline")}
             />
-            <DashboardMetric
-              icon={FileCheck2}
-              label="Health events"
-              value={String(thisMonthRecords)}
-              detail="this month"
-              badge="Monthly"
-              onClick={() => setActiveView("timeline")}
-            />
-            <DashboardMetric
-              icon={latestRecord?.type === "MEDICATION" ? Pill : HeartPulse}
-              label="Latest event"
-              value={latestRecord?.title || "No events yet"}
-              detail={latestRecord ? formatDate(latestRecord.eventDate) : "Start your history"}
-              badge="Recent"
-              compact
-              onClick={() => setActiveView(latestRecord ? "timeline" : "capture")}
-            />
-            <DashboardMetric
-              icon={CalendarDays}
-              label="Member since"
-              value={memberSince}
-              detail={user.demo ? "Demo profile" : "Private account"}
-              badge="Account"
-              compact
-            />
+          </div>
+
+          <section className="dashboard-enter">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-extrabold">Health summary</h2>
+              <button type="button" onClick={() => setActiveView("timeline")} className="text-sm font-extrabold text-teal hover:text-tealDark">See all</button>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <DashboardMetric
+                icon={FileCheck2}
+                label="Health events"
+                value={String(thisMonthRecords)}
+                detail="this month"
+                badge="Monthly"
+                bars={days.map((day) => day.count / maxDailyCount)}
+                onClick={() => setActiveView("timeline")}
+              />
+              <DashboardMetric
+                icon={UserRound}
+                label="Profile"
+                value={`${completion}%`}
+                detail="complete"
+                badge="Private"
+                progress={completion}
+                onClick={() => setActiveView("profile")}
+              />
+              <div className="col-span-2 sm:col-span-1">
+                <DashboardMetric
+                  icon={latestRecord?.type === "MEDICATION" ? Pill : HeartPulse}
+                  label="Latest event"
+                  value={latestRecord?.title || "No events yet"}
+                  detail={latestRecord ? formatDate(latestRecord.eventDate) : "Start your history"}
+                  badge="Recent"
+                  compact
+                  onClick={() => setActiveView(latestRecord ? "timeline" : "capture")}
+                />
+              </div>
+            </div>
           </section>
 
           <section className="surface-card dashboard-enter overflow-hidden rounded-lg">
@@ -1049,57 +1152,17 @@ function DashboardView({
               )}
             </div>
           </section>
-
-          <section className="dashboard-enter grid gap-4 md:grid-cols-[1.15fr_0.85fr]">
-            <div className="surface-card rounded-lg p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-extrabold">Your health at a glance</h2>
-                  <p className="mt-1 text-xs font-semibold text-muted">Events recorded over the last seven days</p>
-                </div>
-                <span className="badge border border-line bg-well text-muted"><span>This week</span></span>
-              </div>
-              <div className="mt-5 grid h-28 grid-cols-7 items-end gap-3 border-b border-line px-1">
-                {days.map((day) => (
-                  <div key={day.label} className="flex h-full flex-col items-center justify-end gap-2">
-                    <span className="w-full max-w-5 rounded-t bg-teal transition-[height] duration-500" style={{ height: `${Math.max(8, (day.count / maxDailyCount) * 78)}%` }} title={`${day.count} events`} />
-                    <span className="text-[11px] font-bold text-muted">{day.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <DailyCheckInCard
-              checkIn={checkIn}
-              loading={loading}
-              saving={checkInSaving}
-              error={checkInError}
-              onSubmit={onCheckIn}
-              onViewHistory={() => setActiveView("timeline")}
-            />
-          </section>
         </div>
 
         <aside className="dashboard-rail-enter space-y-4 xl:fixed xl:bottom-0 xl:right-0 xl:top-[72px] xl:z-20 xl:flex xl:w-[320px] xl:flex-col xl:overflow-y-auto xl:border-l xl:border-line xl:bg-paper xl:p-4">
-          <section className="relative min-h-[278px] overflow-hidden rounded-lg bg-teal">
-            <img src="/assets/butta-hero-wellness.png" alt="Woman taking a calm wellness break with a warm drink" className="absolute inset-0 h-full w-full object-cover object-center" />
-            <div className="absolute inset-0 bg-[#173f35]/60" />
-            <div className="relative z-10 max-w-[64%] p-5 text-white">
-              <h2 className="text-xl font-extrabold leading-6">Take care of yourself</h2>
-              <p className="mt-2 text-xs font-semibold leading-5 text-white/85">Your health is a priority, not a luxury.</p>
-            </div>
-            <button type="button" onClick={() => setActiveView("capture")} className="absolute bottom-4 left-4 right-4 z-10 flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white bg-white px-4 text-sm font-extrabold text-teal transition hover:bg-well">
-              <Plus size={17} />
-              Log health event
+          <section className="surface-card rounded-lg p-5">
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal"><Lightbulb size={19} /></span>
+            <h2 className="mt-3 text-base font-extrabold">Log it while it is fresh</h2>
+            <p className="mt-1.5 text-sm leading-6 text-muted">Note when it started, how strong it felt, and what helped. Small details make your visit brief more useful.</p>
+            <button type="button" onClick={() => setActiveView("capture")} className="mt-3 inline-flex items-center gap-2 text-sm font-extrabold text-teal hover:text-tealDark">
+              Start an entry
+              <ArrowRight size={16} />
             </button>
-          </section>
-
-          <section className="surface-card overflow-hidden rounded-lg">
-            <div className="border-b border-line px-4 py-4">
-              <h2 className="text-base font-extrabold">Quick actions</h2>
-            </div>
-            <QuickAction icon={UserRound} label="Update profile" onClick={() => setActiveView("profile")} />
-            <QuickAction icon={Plus} label="Log health event" onClick={() => setActiveView("capture")} />
-            <QuickAction icon={Clock3} label="View health history" onClick={() => setActiveView("timeline")} />
           </section>
 
           <section className="relative min-h-40 flex-1 overflow-hidden rounded-lg border border-teal/10 bg-well p-5 text-center">
@@ -1115,14 +1178,6 @@ function DashboardView({
   );
 }
 
-function SunMark() {
-  return (
-    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold/15 text-[#b88712]" aria-hidden="true">
-      <Sun size={19} />
-    </span>
-  );
-}
-
 function DashboardMetric({
   icon: Icon,
   label,
@@ -1130,6 +1185,7 @@ function DashboardMetric({
   detail,
   badge,
   progress,
+  bars,
   compact = false,
   onClick,
 }: {
@@ -1139,6 +1195,7 @@ function DashboardMetric({
   detail: string;
   badge: string;
   progress?: number;
+  bars?: number[];
   compact?: boolean;
   onClick?: () => void;
 }) {
@@ -1154,10 +1211,17 @@ function DashboardMetric({
       {typeof progress === "number" && (
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-well"><div className="h-full rounded-full bg-teal" style={{ width: `${progress}%` }} /></div>
       )}
+      {bars && (
+        <div className="mt-3 flex h-6 items-end gap-1" aria-hidden="true">
+          {bars.map((height, index) => (
+            <span key={index} className={`flex-1 rounded-full transition-[height] duration-500 ${height > 0 ? "bg-teal" : "bg-well"}`} style={{ height: `${Math.max(16, height * 100)}%` }} />
+          ))}
+        </div>
+      )}
     </>
   );
 
-  const className = "surface-card min-w-0 rounded-lg p-4 text-left transition hover:-translate-y-0.5 hover:border-teal/30 hover:shadow-lift";
+  const className = "surface-card w-full min-w-0 rounded-lg p-4 text-left transition hover:-translate-y-0.5 hover:border-teal/30 hover:shadow-lift";
   return onClick ? <button type="button" onClick={onClick} className={className}>{content}</button> : <div className={className}>{content}</div>;
 }
 
@@ -1236,15 +1300,6 @@ function DailyCheckInCard({
   );
 }
 
-function QuickAction({ icon: Icon, label, onClick }: { icon: typeof Activity; label: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className="group flex w-full items-center gap-3 border-b border-line px-4 py-3.5 text-left last:border-b-0 hover:bg-well/60">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal/10 text-teal"><Icon size={17} /></span>
-      <span className="min-w-0 flex-1 truncate text-sm font-bold">{label}</span>
-      <ChevronRight size={17} className="text-faint transition group-hover:translate-x-0.5 group-hover:text-teal" />
-    </button>
-  );
-}
 
 function HealthProfileView({
   user,
@@ -1545,10 +1600,16 @@ function DesktopNav({ activeView, onChange }: { activeView: ViewId; onChange: (v
 }
 
 function MobileTopbar({
+  user,
+  onProfile,
+  onSettings,
   onSignOut,
   showInsightTrigger,
   onOpenInsightRail,
 }: {
+  user: AppUser;
+  onProfile: () => void;
+  onSettings: () => void;
   onSignOut: () => void;
   showInsightTrigger: boolean;
   onOpenInsightRail: () => void;
@@ -1575,9 +1636,7 @@ function MobileTopbar({
             <Activity size={18} />
           </button>
         )}
-        <button onClick={onSignOut} className="grid h-10 w-10 place-items-center rounded-lg border border-line bg-paper2" aria-label="Sign out" title="Sign out">
-          <LogOut size={18} />
-        </button>
+        <AccountMenu user={user} onProfile={onProfile} onSettings={onSettings} onSignOut={onSignOut} />
       </div>
     </header>
   );
@@ -2385,26 +2444,46 @@ function StatusStrip({ label, value }: { label: string; value: string }) {
   );
 }
 
+const mobileNavLabels: Partial<Record<ViewId, string>> = { dashboard: "Home", timeline: "History", profile: "Profile", settings: "Settings" };
+const mobileNavLeft: ViewId[] = ["dashboard", "timeline"];
+const mobileNavRight: ViewId[] = ["profile", "settings"];
+
 function MobileNav({ activeView, onChange }: { activeView: ViewId; onChange: (view: ViewId) => void }) {
+  const renderItem = (id: ViewId) => {
+    const item = navItems.find((entry) => entry.id === id);
+    if (!item) return null;
+    const Icon = item.icon;
+    const active = activeView === id;
+    return (
+      <button
+        key={id}
+        type="button"
+        onClick={() => onChange(id)}
+        aria-current={active ? "page" : undefined}
+        className={`flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[11px] font-semibold transition ${active ? "text-teal" : "text-muted"}`}
+      >
+        <Icon size={21} strokeWidth={active ? 2.4 : 2} />
+        <span className="max-w-full truncate">{mobileNavLabels[id] ?? item.label}</span>
+      </button>
+    );
+  };
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-tealDark/30 bg-teal text-paper shadow-2xl lg:hidden">
-      <div className="grid grid-cols-5">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = activeView === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onChange(item.id)}
-              className={`flex min-h-[72px] flex-col items-center justify-center gap-1 px-1 text-[11px] font-semibold transition ${
-                active ? "text-gold" : "text-paper/70"
-              }`}
-            >
-              <Icon size={20} />
-              <span className="max-w-full truncate">{item.label}</span>
-            </button>
-          );
-        })}
+    <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <div className="grid grid-cols-5 items-center">
+        {mobileNavLeft.map(renderItem)}
+        <div className="grid place-items-center">
+          <button
+            type="button"
+            onClick={() => onChange("capture")}
+            aria-label="Log a health event"
+            aria-current={activeView === "capture" ? "page" : undefined}
+            className={`-mt-8 grid h-14 w-14 place-items-center rounded-full text-white shadow-lift ring-4 ring-white transition active:scale-95 ${activeView === "capture" ? "bg-tealDark" : "bg-teal hover:bg-tealDark"}`}
+          >
+            <Plus size={26} strokeWidth={2.6} />
+          </button>
+        </div>
+        {mobileNavRight.map(renderItem)}
       </div>
     </nav>
   );

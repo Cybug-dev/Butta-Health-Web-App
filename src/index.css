@@ -230,3 +230,8 @@ select:focus-visible {
     will-change: auto;
   }
 }
+
+.image-fade-left {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 70%);
+  mask-image: linear-gradient(to right, transparent, #000 70%);
+}
