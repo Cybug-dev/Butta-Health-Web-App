@@ -2,8 +2,8 @@
 
 Audience: any AI agent or engineer who creates or changes UI in this repo.
 Read this before writing a component, page, or style. The values here were taken
-from the real code (`tailwind.config.js`, `src/index.css`, `src/App.tsx`,
-`src/components/*`), so they describe what the app already is.
+from the real code (`tailwind.config.js`, `src/styles/*`, `src/components/*`,
+`src/pages/*`), so they describe what the app already is.
 
 Last updated: October 15, 2026 (dashboard redesign, mobile nav with center action, account menu)
 
@@ -18,7 +18,7 @@ Last updated: October 15, 2026 (dashboard redesign, mobile nav with center actio
    explicit instruction from the user > this document > existing app code > a
    reference image/template.
 3. **Use existing tokens and recipes.** Colors, fonts, and shadows come from
-   `tailwind.config.js`. Shared looks come from the classes in `src/index.css`
+   `tailwind.config.js`. Shared looks come from the classes in `src/styles/components.css`
    (`surface-card`, `soft-card`, `badge`, `badge-dot`, `scroll-row`).
 4. **No hard-coded hex values and no new arbitrary values** unless Section 4.9 allows it.
 5. **Radius is `rounded-lg`** for almost everything, `rounded-full` for avatars, icon
@@ -115,8 +115,8 @@ stock-photo clinical imagery.
 - React 18 + TypeScript, Vite 6, Tailwind CSS 3 (config in `tailwind.config.js`)
 - GSAP 3 for entrance/overlay motion, `lucide-react` for icons
 - No component library (no shadcn, MUI, Radix, etc.) and no CSS-in-JS. Do not add one without approval.
-- Styling is Tailwind utility classes in JSX plus a small set of shared classes in `src/index.css`.
-- Fonts load from Google Fonts in `src/index.css`. Do not add other font families.
+- Styling is Tailwind utility classes in JSX plus a small set of shared classes in `src/styles/`.
+- Fonts load from Google Fonts in `src/styles/tailwind.css`. Do not add other font families.
 
 ---
 
@@ -159,7 +159,7 @@ panels, `/15` for gold, `/30` for stronger alert borders. Do not invent other st
 | Status: Confirmed / Prepared / Needs monitoring | emerald / teal / amber chips |
 | Severity: Mild / Moderate / Severe / Not specified | emerald / amber / rust / `border-line bg-well text-muted` |
 
-These live in `typeStyles`, `statusStyles`, and `severityStyles` in `src/App.tsx`.
+These live in `typeStyles`, `statusStyles`, and `severityStyles` in `src/constants/records.ts`.
 Reuse those maps. When adding a new event type or status, add it there.
 
 **Rules**
@@ -355,7 +355,7 @@ className="h-11 w-full rounded-lg border border-transparent bg-well pl-11 pr-4 t
 // Checkbox/toggle row: whole row is the label, "accent-teal" 20px checkbox, helper text beneath
 ```
 
-- **Dropdowns use `AnimatedSelect`** (`src/components/AnimatedSelect.tsx`). Do not use a native `<select>` for visible UI.
+- **Dropdowns use `AnimatedSelect`** (`src/components/ui/AnimatedSelect.tsx`). Do not use a native `<select>` for visible UI.
 - Every control has a visible label or `aria-label`. Placeholders are never the only label.
 - Errors: `text-xs font-semibold text-rust` under the field with `role="alert"`.
 
@@ -371,7 +371,7 @@ inner `<span>` last so truncation works, and set `title`.
 Round icon chip (`h-10 w-10 rounded-full bg-teal/10 text-teal`) top-left, a
 neutral badge top-right, label (`text-xs font-bold text-muted`), value
 (`text-2xl font-extrabold`), detail (`text-xs font-semibold text-faint`),
-optional progress bar. See `DashboardMetric` in `src/App.tsx`.
+optional progress bar. See `DashboardMetric` in `src/components/dashboard/DashboardMetric.tsx`.
 
 ### Progress bar
 
@@ -389,7 +389,7 @@ See `QuickAction`.
 - **Desktop item:** `rounded-lg px-3 py-3 text-sm font-semibold`. Active: `bg-well text-teal shadow-[inset_3px_0_0_#2F7D69]`. Inactive: `text-muted hover:bg-well/70 hover:text-ink`. Icon size 19.
 - **Mobile item:** icon 21 over an 11px label, active `text-teal`, inactive `text-muted`. The center "+" is the primary log action and always routes to Log Event.
 - Navigation labels are one or two words. Keep five slots on mobile (four items plus the center action).
-- **Account menu** (`src/components/AccountMenu.tsx`): avatar button opening a `shadow-float` panel with Health profile, Settings, and Sign out. Use it instead of a bare sign-out icon in any header.
+- **Account menu** (`src/components/account/AccountMenu.tsx`): avatar button opening a `shadow-float` panel with Health profile, Settings, and Sign out. Use it instead of a bare sign-out icon in any header.
 
 ### Overlays
 
@@ -474,10 +474,10 @@ Applies to every label, empty state, tooltip, and generated string.
   `clearProps` for transform/opacity/visibility/willChange when the animation
   is a one-shot so layout and stacking are not left modified.
 - Animate `transform` and `opacity` only. Never animate width/height/top/left (except the existing progress/bar heights).
-- **Respect `prefers-reduced-motion`.** `src/index.css` already collapses CSS
+- **Respect `prefers-reduced-motion`.** `src/styles/motion.css` already collapses CSS
   durations globally. New GSAP code must skip or shorten animation when the
   media query matches.
-- Add `will-change` only to the named entrance classes in `index.css`; remove under reduced motion.
+- Add `will-change` only to the named entrance classes in `src/styles/motion.css`; remove under reduced motion.
 - Motion explains change (something appeared, moved, was confirmed). It is never decoration that blocks input.
 - Hover lift is `-translate-y-0.5`, nothing larger.
 
@@ -485,7 +485,7 @@ Applies to every label, empty state, tooltip, and generated string.
 
 ## 9. Accessibility
 
-1. **Focus:** `index.css` gives every button/input/textarea/select a global
+1. **Focus:** `src/styles/base.css` gives every button/input/textarea/select a global
    `outline: 2px solid #c9a227; outline-offset: 2px` on `:focus-visible`. Text
    inputs additionally use `focus:border-teal focus:ring-2 focus:ring-teal/10`.
    Never remove focus indication (`outline-none` is allowed only when you supply the ring/border replacement).
@@ -511,19 +511,54 @@ The single biggest consistency risk is local one-offs. Therefore:
 1. **New color / shadow / font / spacing needs** go into `tailwind.config.js`
    (`theme.extend`) as a named token with a role-based name, then are used by
    class. They do not go inline as hex or arbitrary values.
-2. **New reusable look** (used in 2+ places) goes into `src/index.css` as a named
+2. **New reusable look** (used in 2+ places) goes into `src/styles/components.css` as a named
    class in the existing style (for example `surface-card`), or into a shared
    component in `src/components/`. Do not copy-paste 150-character class strings into a third location. Extract.
-3. **Reuse before creating.** Check `src/components/` and the helper components in
-   `src/App.tsx` (`DashboardMetric`, `QuickAction`, `ProfileField`,
-   `SettingToggle`, `TypeBadge`, `StatusBadge`, `SeverityBadge`, `AnimatedSelect`, `ConfirmModal`) first.
+3. **Reuse before creating.** Check `src/components/` first (`ui/`, `layout/`,
+   `dashboard/`, `capture/`, `history/`): `DashboardMetric`, `ProfileField`,
+   `SettingToggle`, `TypeBadge`, `StatusBadge`, `SeverityBadge`, `AnimatedSelect`,
+   `AccountMenu`, `ConfirmModal`.
 4. **No new dependencies** for UI (component kits, icon packs, animation libs,
    chart libs) without explicit approval. Charts today are hand-built CSS bars.
 5. **When the user changes the design on purpose** (new color, removed
    component, different radius), change the token/class once, update this
    document in the same change, and bump "Last updated". The doc must never lag the code.
-6. Large page components are already big (`src/App.tsx` is ~2,400 lines).
-   Put new views and reusable pieces in new files under `src/components/` rather than growing it further.
+6. Keep files small and single-purpose (see Section 10.1 below for where things
+   live). A new screen goes in `src/pages/`, a reusable piece in `src/components/<area>/`,
+   stateful logic in `src/hooks/`. Do not put views or helpers back into `App.tsx`.
+
+### 10.1 Source layout
+
+```
+src/
+  App.tsx              auth/session shell only; renders PublicExperience or HealthWorkspace
+  main.tsx             entry; imports styles in cascade order
+  layouts/             HealthWorkspace: composes hooks, layout, and pages (no business logic)
+  pages/               one file per screen: DashboardPage, LogEventPage, HistoryPage,
+                       ProfilePage, SettingsPage, CompanionPage, DoctorPrepPage, DoctorSummaryPage
+    public/            PublicExperience (router), LandingPage, AuthPage, OnboardingPage
+  components/
+    ui/                generic pieces: AnimatedSelect, RecordBadges, FormFields
+    layout/            Sidebar, DesktopNav, MobileNav, topbars, InsightRail, HeaderBand
+    dashboard/         DashboardMetric, DailyCheckInCard, HealthEventIcon
+    capture/           ObservationComposer, ConfirmModal, ExtractionPreview, TagPicker, ...
+    history/           TimelineCard
+    account/           AccountMenu
+    public/            Brand, AuthFields
+  hooks/               useHealthRecords, useRecordFilters, useHealthProfile, useAiConsent,
+                       useDailyCheckIn, useObservationCapture, useWorkspaceNavigation,
+                       useWorkspaceAnimations
+  constants/           records.ts (type/status/severity styles and labels), motion.ts
+  utils/               format.ts, profile.ts, routes.ts, text.ts
+  styles/              tailwind.css (fonts + directives), base.css, components.css,
+                       layout.css, motion.css; loaded in that order from main.tsx
+  services/            api.ts, mockApi.ts, demoStorage.ts (unchanged)
+  types.ts, data.ts    shared types and static data
+```
+
+Rules: pages receive data and callbacks as props and never fetch; hooks own state
+and API calls; components are presentational. Do not change the style import order
+in `main.tsx` (it preserves the original CSS cascade).
 
 ---
 
@@ -534,14 +569,15 @@ Do not replicate them. Fix them opportunistically when you touch the line.
 
 | Where | Issue | Use instead |
 | --- | --- | --- |
-| `App.tsx` modal close buttons, `rounded border-line bg-paper2` | Bare `rounded` | `rounded-lg border border-line bg-white` |
-| `App.tsx` ~line 1988 doc-prep button `rounded bg-teal … font-semibold` | Bare `rounded`, non-standard weight and padding | Primary recipe (Section 6) |
-| `App.tsx` ~line 2348 `ConfirmModal` cancel button `rounded … px-5 py-3` | Bare `rounded` | Secondary recipe |
+| `ConfirmModal.tsx` and `InsightRail.tsx` close buttons, `rounded border-line bg-paper2` | Bare `rounded` | `rounded-lg border border-line bg-white` |
+| `DoctorPrepPage.tsx` primary button `rounded bg-teal … font-semibold` | Bare `rounded`, non-standard weight and padding | Primary recipe (Section 6) |
+| `ConfirmModal.tsx` cancel button `rounded … px-5 py-3` | Bare `rounded` | Secondary recipe |
 | `ConfirmModal` `font-serif text-4xl` plus other 4xl headings | Heavy heading size inside a compact modal | `text-2xl`-`text-3xl` for modal titles |
 | `shadow-2xl` on modal panel and mobile nav, plus `shadow-sm`/`shadow-md` | Off-scale shadows | `shadow-float` / `shadow-lift` |
 | `#173f35`, `#dcebe4`, `#f4f7f6` in classes, `#2F7D69` in `shadow-[inset_3px_0_0_#2F7D69]` | Hard-coded hex | Add/use a token (for example a `tealDeep` token or `bg-paper`) |
 | `text-[#8a6800]`, `text-[#725900]`, `text-[#b88712]` | One-off dark-gold text colors | Add one `goldInk` token and use it everywhere |
 | Global `:focus-visible` outline is gold `#c9a227` while inputs use teal | Two focus colors | Keep the global gold outline for buttons; use teal ring on text fields as today. Do not introduce a third. |
+| `src/styles/layout.css`: `.view-panel div { max-width: 100% }` below 640px | Overrides every `max-w-*` utility on divs inside views on mobile, so `max-w-[62%]` silently does nothing | Constrain with `w-*`, `basis-*`, or padding on mobile. Treat removing this rule as a separate, tested change. |
 | `emerald` and `teal` are the same hex (`#2F7D69`) | Two names for one color | Keep both names: `emerald` = positive/symptom *meaning*, `teal` = brand *meaning*. Don't merge in code. |
 | `font-serif` / `font-mono` naming | Names imply different families, but both are Nunito Sans | Treat as style hooks (4.2). Do not add real serif/mono fonts |
 

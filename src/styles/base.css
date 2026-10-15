@@ -1,0 +1,79 @@
+:root {
+  color-scheme: light;
+  font-family: "Nunito Sans", Inter, system-ui, sans-serif;
+  background: #f4f7f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #f4f7f6;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: #f4f7f6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-serif {
+  font-weight: 750;
+  letter-spacing: 0 !important;
+}
+
+.font-mono {
+  font-weight: 700;
+  letter-spacing: 0.045em !important;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #c9a227;
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #cce6de;
+  color: #17211f;
+}
+
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(47, 125, 105, 0.3);
+  border-radius: 999px;
+}
+
+.scroll-row {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-inline: contain;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}

@@ -1,7 +1,7 @@
 import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react";
 import gsap from "gsap";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { AppUser } from "../services/api";
+import type { AppUser } from "../../services/api";
 
 type AccountMenuProps = {
   user: AppUser;

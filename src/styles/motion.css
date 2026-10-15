@@ -1,0 +1,72 @@
+.public-header,
+.hero-left-section,
+.hero-right-section,
+.auth-header,
+.auth-left-section,
+.auth-right-section,
+.auth-image-reveal,
+.auth-overlay-nav,
+.auth-form-content,
+.hero-copy-item,
+.hero-visual-frame,
+.hero-float,
+.hero-support {
+  will-change: transform, opacity;
+}
+
+.dashboard-enter {
+  will-change: transform, opacity;
+}
+
+.public-header {
+  transition:
+    background-color 280ms ease,
+    border-color 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.navbar-inner {
+  transition: height 280ms ease;
+}
+
+.public-header.is-scrolled {
+  border-color: #dce6e2;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 30px rgba(27, 52, 45, 0.09);
+  backdrop-filter: blur(18px);
+}
+
+.public-header.is-scrolled .navbar-inner {
+  height: 4.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .public-header,
+  .hero-left-section,
+  .hero-right-section,
+  .auth-header,
+  .auth-left-section,
+  .auth-right-section,
+  .auth-image-reveal,
+  .auth-overlay-nav,
+  .auth-form-content,
+  .hero-copy-item,
+  .hero-visual-frame,
+  .hero-float,
+  .hero-support {
+    will-change: auto;
+  }
+
+  .dashboard-enter {
+    will-change: auto;
+  }
+}
