@@ -100,7 +100,7 @@ export function ConfirmModal({
                 <select
                   value={extracted.severity}
                   onChange={(event) => setExtracted({ ...extracted, severity: event.target.value as ExtractedRecord["severity"] })}
-                  className="mt-1 h-10 w-full rounded border border-line bg-paper px-3 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  className="field-input mt-1 h-10 w-full px-3 text-sm"
                 >
                   <option>Mild</option>
                   <option>Moderate</option>

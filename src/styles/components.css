@@ -1,13 +1,40 @@
 .surface-card {
   border: 1px solid #e4ece6;
   background: #fff;
-  box-shadow: 0 1px 3px 0 rgba(20, 45, 33, 0.04), 0 4px 12px -2px rgba(20, 45, 33, 0.03);
+  box-shadow: 0 4px 20px -2px rgba(15, 41, 32, 0.05), 0 1px 3px 0 rgba(15, 41, 32, 0.03);
 }
 
 .soft-card {
   border: 1px solid #e4ece6;
   background: #f9fbfa;
-  box-shadow: 0 1px 3px 0 rgba(20, 45, 33, 0.04), 0 4px 12px -2px rgba(20, 45, 33, 0.03);
+  box-shadow: 0 4px 20px -2px rgba(15, 41, 32, 0.05), 0 1px 3px 0 rgba(15, 41, 32, 0.03);
+}
+
+/* Shared input look; size and padding stay on each element. */
+.field-input {
+  border: 1px solid #dde7e1;
+  border-radius: 1rem;
+  background: #fff;
+  color: #17211f;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(20, 44, 33, 0.03);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.field-input::placeholder {
+  color: #899590;
+  font-weight: 400;
+}
+
+.field-input:focus {
+  border-color: #2f7d69;
+  box-shadow: 0 0 0 3px rgba(47, 125, 105, 0.15);
+}
+
+.field-input:disabled {
+  background: #eef4f2;
+  color: #899590;
 }
 
 .badge {

@@ -2,7 +2,7 @@ export function ProfileField({ label, value, onChange, placeholder, disabled = f
   return (
     <label className={`block ${className}`}>
       <span className="text-sm font-extrabold">{label}</span>
-      <input type={type} value={value} onChange={(event) => onChange?.(event.target.value)} placeholder={placeholder} disabled={disabled} className="mt-2 h-12 w-full rounded-lg border border-line bg-white px-4 text-sm outline-none transition placeholder:text-faint focus:border-teal disabled:bg-well disabled:text-muted" />
+      <input type={type} value={value} onChange={(event) => onChange?.(event.target.value)} placeholder={placeholder} disabled={disabled} className="field-input mt-2 h-12 w-full px-4 text-sm" />
     </label>
   );
 }
@@ -23,7 +23,7 @@ export function EditField({ label, value, onChange }: { label: string; value: st
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1 h-10 w-full rounded border border-line bg-paper px-3 text-sm outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+        className="field-input mt-1 h-10 w-full px-3 text-sm"
       />
     </label>
   );

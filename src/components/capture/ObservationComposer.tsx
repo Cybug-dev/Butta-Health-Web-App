@@ -57,6 +57,11 @@ export function ObservationComposer({
     return () => context.revert();
   }, [expanded]);
 
+  const hasText = observation.trim().length > 0;
+  useEffect(() => {
+    if (hasText) setExpanded(true);
+  }, [hasText]);
+
   useEffect(() => {
     if (expanded && textareaRef.current) {
       const timer = setTimeout(() => textareaRef.current?.focus(), 60);

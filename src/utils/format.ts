@@ -10,9 +10,15 @@ export function formatDate(value: string, mode: "short" | "long" = "short") {
   }).format(new Date(value));
 }
 
+export type DayPeriod = "morning" | "afternoon" | "evening";
+
+export function getDayPeriod(date = new Date()): DayPeriod {
+  const hour = date.getHours();
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "evening";
+}
+
 export function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  return `Good ${getDayPeriod()}`;
 }

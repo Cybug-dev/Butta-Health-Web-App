@@ -103,7 +103,7 @@ export function SettingsPage({
             disabled={!preferences.dailyCheckIn || preferenceStatus === "loading"}
             onChange={(event) => setPreferences({ ...preferences, checkInTime: event.target.value })}
             onBlur={() => void savePreferences(preferences)}
-            className="h-10 rounded-lg border border-line bg-white px-3 text-sm font-bold outline-none focus:border-teal disabled:bg-well disabled:text-faint"
+            className="field-input h-10 px-3 text-sm"
           />
         </label>
       </section>

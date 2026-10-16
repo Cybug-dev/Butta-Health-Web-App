@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ConfirmModal } from "../components/capture/ConfirmModal";
 import { DashboardTopbar } from "../components/layout/DashboardTopbar";
 import { HeaderBand } from "../components/layout/HeaderBand";
@@ -8,6 +8,8 @@ import { MobileTopbar } from "../components/layout/MobileTopbar";
 import { Sidebar } from "../components/layout/Sidebar";
 import { useAiConsent } from "../hooks/useAiConsent";
 import { useDailyCheckIn } from "../hooks/useDailyCheckIn";
+import { appendDictation, useDictation } from "../hooks/useDictation";
+import { useSidebarCollapsed } from "../hooks/useSidebarCollapsed";
 import { useHealthProfile } from "../hooks/useHealthProfile";
 import { useHealthRecords } from "../hooks/useHealthRecords";
 import { useObservationCapture } from "../hooks/useObservationCapture";
@@ -60,6 +62,23 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
     onSaved: () => navigateView("timeline"),
   });
   useWorkspaceAnimations(viewRef, activeView);
+  const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
+
+  const observationRef = useRef(capture.observation);
+  useEffect(() => {
+    observationRef.current = capture.observation;
+  }, [capture.observation]);
+  const { setObservation } = capture;
+  const appendToObservation = useCallback((text: string) => {
+    observationRef.current = appendDictation(observationRef.current, text);
+    setObservation(observationRef.current);
+  }, [setObservation]);
+  const voiceNote = useDictation(appendToObservation);
+  const { listening: voiceListening, stop: stopVoiceNote } = voiceNote;
+
+  useEffect(() => {
+    if (activeView !== "capture" && voiceListening) stopVoiceNote();
+  }, [activeView, voiceListening, stopVoiceNote]);
 
   const showInsightRail = ["capture", "timeline", "companion", "doctor-prep", "doctor-summary"].includes(activeView);
 
@@ -72,9 +91,11 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
           recordCount={metrics.records}
           selectedCount={selectedRecords.length}
           onSignOut={onSignOut}
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
         />
 
-        <main className="min-w-0 pb-28 lg:ml-64 lg:pb-0">
+        <main className={`min-w-0 pb-28 transition-[margin] duration-300 ease-out lg:pb-0 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`}>
           <MobileTopbar
             user={user}
             onProfile={() => navigateView("profile")}
@@ -124,6 +145,11 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                       capture.startQuickLog(preset);
                       navigateView("capture");
                     }}
+                    voiceNoteSupported={voiceNote.supported}
+                    onVoiceNote={() => {
+                      navigateView("capture");
+                      voiceNote.start();
+                    }}
                   />
                 )}
                 {activeView === "profile" && (
@@ -143,6 +169,8 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                     onEnableAiCapture={() => void saveAiConsent(true)}
                     records={records}
                     isDemo={Boolean(user.demo)}
+                    voiceListening={voiceNote.listening}
+                    onStopVoice={voiceNote.stop}
                   />
                 )}
                 {activeView === "timeline" && (

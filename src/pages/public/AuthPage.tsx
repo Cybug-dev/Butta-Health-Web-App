@@ -119,7 +119,7 @@ export function AuthPage({
                     onChange={(event) => setForm({ ...form, password: event.target.value })}
                     autoComplete={isSignUp ? "new-password" : "current-password"}
                     required
-                    className="h-12 w-full rounded-lg border border-line bg-white pl-11 pr-12 text-sm font-semibold text-ink outline-none transition placeholder:text-faint focus:border-teal focus:ring-2 focus:ring-teal/10"
+                    className="field-input h-12 w-full pl-11 pr-12 text-sm"
                     placeholder={isSignUp ? "8 characters minimum" : "Enter your password"}
                   />
                   <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-1.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-md text-muted transition hover:bg-well hover:text-ink" aria-label={showPassword ? "Hide password" : "Show password"}>
@@ -140,7 +140,7 @@ export function AuthPage({
                       onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
                       autoComplete="new-password"
                       required
-                      className="h-12 w-full rounded-lg border border-line bg-white pl-11 pr-4 text-sm font-semibold text-ink outline-none transition placeholder:text-faint focus:border-teal focus:ring-2 focus:ring-teal/10"
+                      className="field-input h-12 w-full pl-11 pr-4 text-sm"
                       placeholder="Re-enter your password"
                     />
                   </span>

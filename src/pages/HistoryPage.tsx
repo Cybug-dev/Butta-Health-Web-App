@@ -36,7 +36,7 @@ export function HistoryPage({
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="h-12 w-full rounded border border-line bg-well pl-10 pr-3 outline-none transition focus:border-teal focus:ring-1 focus:ring-teal"
+              className="field-input h-12 w-full pl-10 pr-3 text-sm"
               placeholder="Search records"
             />
           </div>

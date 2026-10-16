@@ -1,15 +1,39 @@
-import { ArrowRight, Check, CheckCircle2, Lightbulb } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Check, Lightbulb, Lock, Mic, ShieldCheck } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { appendDictation, useDictation } from "../../hooks/useDictation";
 import type { DailyCheckIn } from "../../types";
 
 const MIN_WORDS = 5;
 
-const cardClass = "surface-card relative flex min-h-52 flex-col overflow-hidden rounded-3xl p-5 sm:p-6";
-const iconTileClass = "grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-amber-200/60 bg-amber-50 text-amber-600 shadow-sm";
-const labelClass = "inline-block rounded-full bg-amber-100/70 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-700";
-
 function countWords(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function CardShell({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`surface-card relative flex min-h-52 flex-col overflow-hidden rounded-3xl p-5 sm:p-6 ${className}`}>
+      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-amber-100/60 blur-2xl" />
+      <div className="relative flex flex-1 flex-col">{children}</div>
+    </div>
+  );
+}
+
+function CardHeader({ icon }: { icon: ReactNode }) {
+  return (
+    <div className="mb-3 flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2.5">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-amber/20 bg-amber/10 text-amber-700">{icon}</span>
+        <div>
+          <span className="block text-[10px] font-extrabold uppercase tracking-wider text-faint">Today's check-in</span>
+          <span className="block text-[11px] font-semibold text-teal">Daily Bio-Pulse</span>
+        </div>
+      </div>
+      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-teal/20 bg-teal/5 px-2 py-0.5 text-[10px] font-bold text-tealDark">
+        <Lock size={10} strokeWidth={2.5} />
+        Private
+      </span>
+    </div>
+  );
 }
 
 export function DailyCheckInCard({
@@ -28,75 +52,92 @@ export function DailyCheckInCard({
   onViewHistory: () => void;
 }) {
   const [notes, setNotes] = useState("");
+  const dictation = useDictation((text) => setNotes((current) => appendDictation(current, text)));
   const wordCount = countWords(notes);
   const ready = wordCount >= MIN_WORDS;
 
   if (loading || !checkIn) {
-    return <div className={`${cardClass} items-center justify-center text-sm font-medium text-muted`}>Preparing today's check-in...</div>;
+    return (
+      <CardShell>
+        <div className="grid flex-1 place-items-center text-sm font-medium text-muted">Preparing today's check-in...</div>
+      </CardShell>
+    );
   }
 
   if (checkIn.respondedAt) {
     return (
-      <div className={`${cardClass} justify-between`}>
-        <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-amber-50 blur-2xl" />
-        <div className="relative">
-          <span className={iconTileClass}><Check size={19} /></span>
-          <p className={`${labelClass} mt-4`}>Today's check-in</p>
-          <h2 className="mt-1 text-sm font-bold leading-snug text-ink sm:text-base">Your response is recorded</h2>
-          <p className="mt-2 text-xs leading-relaxed text-muted sm:text-sm">It is now part of your health timeline and can be included in visit preparation.</p>
-        </div>
-        <button type="button" onClick={onViewHistory} className="relative mt-4 inline-flex items-center gap-1.5 self-start text-xs font-bold text-teal transition hover:text-tealDark">
-          View in history <ArrowRight size={14} />
+      <CardShell>
+        <CardHeader icon={<Check size={18} />} />
+        <h3 className="text-sm font-bold leading-snug text-ink sm:text-base">Your response is recorded</h3>
+        <p className="mt-2 text-xs leading-relaxed text-muted sm:text-sm">It is now part of your health timeline and can be included in visit preparation.</p>
+        <button type="button" onClick={onViewHistory} className="group mt-auto inline-flex items-center gap-1.5 self-start pt-4 text-xs font-bold text-teal transition hover:text-tealDark">
+          View in history <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
         </button>
-      </div>
+      </CardShell>
     );
   }
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (ready && !saving) void onSubmit(notes.trim());
-      }}
-      className={`${cardClass} justify-between`}
-    >
-      <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-amber-50 blur-2xl" />
-      <div className="relative">
-        <div className="flex items-start gap-3 sm:items-center sm:gap-3.5">
-          <span className={iconTileClass}><Lightbulb size={19} /></span>
-          <div>
-            <p className={labelClass}>Today's check-in</p>
-            <p className="mt-0.5 text-sm font-bold leading-snug text-ink sm:mt-1 sm:text-lg">{checkIn.promptText}</p>
-          </div>
+    <CardShell>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!ready || saving) return;
+          dictation.stop();
+          void onSubmit(notes.trim());
+        }}
+        className="flex flex-1 flex-col"
+      >
+        <CardHeader icon={<Lightbulb size={18} />} />
+        <h3 className="mb-3 text-sm font-bold leading-snug text-ink sm:text-base">{checkIn.promptText}</h3>
+        <div className="relative">
+          <textarea
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            maxLength={2000}
+            rows={3}
+            placeholder="Write a short response..."
+            aria-label="Daily check-in response"
+            aria-describedby="check-in-guide"
+            className={`field-input block w-full resize-none p-3.5 text-xs leading-relaxed sm:p-4 sm:text-sm ${dictation.supported ? "pr-11 sm:pr-12" : ""}`}
+          />
+          {dictation.supported && (
+            <button
+              type="button"
+              onClick={dictation.toggle}
+              aria-label={dictation.listening ? "Stop dictation" : "Dictate with voice"}
+              aria-pressed={dictation.listening}
+              title={dictation.listening ? "Stop dictation" : "Dictate with voice"}
+              className={`absolute bottom-3 right-3 rounded-xl p-1.5 transition-colors ${
+                dictation.listening ? "bg-rose-500/10 text-rose-500 motion-safe:animate-pulse" : "text-faint hover:bg-well hover:text-teal"
+              }`}
+            >
+              <Mic size={16} />
+            </button>
+          )}
         </div>
-        <textarea
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          maxLength={2000}
-          rows={3}
-          placeholder="Write a short response... (e.g. headache eased after lunch, mild fatigue persisted)"
-          aria-label="Daily check-in response"
-          aria-describedby="check-in-guide"
-          className="mt-4 w-full resize-none rounded-2xl border border-fieldLine bg-field p-3.5 text-xs font-medium leading-relaxed text-ink outline-none transition placeholder:font-normal placeholder:text-faint focus:border-teal focus:bg-white focus:ring-2 focus:ring-teal/25 sm:p-4 sm:text-sm"
-        />
-        <p id="check-in-guide" className={`mt-2 text-xs font-medium ${ready ? "text-teal" : "text-faint"}`}>
-          {ready ? "Looks good. You can save your check-in." : `Write at least ${MIN_WORDS} words to save (${wordCount} of ${MIN_WORDS}).`}
+        <p id="check-in-guide" className={`mt-2 text-[11px] font-medium sm:text-xs ${ready ? "text-teal" : "text-faint"}`}>
+          {dictation.listening
+            ? "Listening... speak your response."
+            : ready
+              ? "Looks good. You can save your check-in."
+              : `Write at least ${MIN_WORDS} words to save (${wordCount} of ${MIN_WORDS}).`}
         </p>
         {error && <p role="alert" className="mt-1.5 text-xs font-semibold text-rust">{error}</p>}
-      </div>
-      <div className="relative mt-3 flex items-center justify-between gap-3 sm:mt-5 sm:border-t sm:border-line sm:pt-3">
-        <span className="hidden items-center gap-1.5 text-xs font-medium text-faint sm:flex">
-          <CheckCircle2 size={14} className="text-teal" />
-          Encrypted &amp; private
-        </span>
-        <button
-          type="submit"
-          disabled={saving || !ready}
-          className="ml-auto inline-flex items-center justify-center rounded-xl bg-teal px-5 py-2.5 text-xs font-bold text-white shadow-sm shadow-tealDark/20 transition enabled:hover:bg-tealDark enabled:hover:shadow-md focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-tealSoft disabled:shadow-none sm:px-6 sm:text-sm sm:font-semibold"
-        >
-          {saving ? "Saving..." : "Save check-in"}
-        </button>
-      </div>
-    </form>
+        <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
+            <ShieldCheck size={14} className="text-teal" />
+            Auto-encrypted
+          </span>
+          <button
+            type="submit"
+            disabled={saving || !ready}
+            className="rounded-xl bg-leaf px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-leaf/20 transition-all focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2 enabled:hover:bg-tealDark enabled:active:scale-95 disabled:cursor-not-allowed disabled:bg-tealSoft disabled:shadow-none sm:text-sm"
+          >
+            {saving ? "Saving..." : "Save check-in"}
+          </button>
+        </div>
+      </form>
+    </CardShell>
   );
 }

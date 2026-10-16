@@ -8,10 +8,10 @@ type AccountMenuProps = {
   onProfile: () => void;
   onSettings: () => void;
   onSignOut: () => void;
-  showName?: boolean;
+  variant: "desktop" | "mobile";
 };
 
-export function AccountMenu({ user, onProfile, onSettings, onSignOut, showName = false }: AccountMenuProps) {
+export function AccountMenu({ user, onProfile, onSettings, onSignOut, variant }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -58,15 +58,27 @@ export function AccountMenu({ user, onProfile, onSettings, onSignOut, showName =
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className={`flex min-w-0 items-center gap-3 rounded-full transition ${showName ? "py-1 pl-1 pr-3 hover:bg-well" : ""}`}
+        className={
+          variant === "desktop"
+            ? "flex min-w-0 items-center gap-3 rounded-2xl border border-transparent py-1 pl-1.5 pr-3 transition-all hover:border-line hover:bg-well/70"
+            : "flex min-w-0 items-center gap-1.5 rounded-full border border-line bg-white py-0.5 pl-0.5 pr-2 shadow-sm transition active:scale-95"
+        }
       >
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-teal text-sm font-extrabold text-white shadow-lift">
-          {initials}
-        </span>
-        {showName && (
+        {variant === "desktop" ? (
           <>
-            <span className="block max-w-32 truncate text-sm font-extrabold">{user.firstName}</span>
-            <ChevronDown size={16} className={`text-faint transition-transform duration-300 ${open ? "rotate-180 text-teal" : ""}`} />
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-tr from-leaf to-teal text-xs font-bold tracking-tight text-white shadow-sm ring-2 ring-teal/20">
+              {initials}
+            </span>
+            <span className="min-w-0 text-left">
+              <span className="block max-w-32 truncate text-sm font-bold leading-tight text-ink">{user.firstName}</span>
+              <span className="block text-[11px] font-medium leading-tight text-faint">{user.demo ? "Demo Account" : "Patient Account"}</span>
+            </span>
+            <ChevronDown size={16} className={`ml-0.5 text-faint transition-transform duration-300 ${open ? "rotate-180 text-teal" : ""}`} />
+          </>
+        ) : (
+          <>
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-leaf text-[10px] font-bold tracking-tight text-white">{initials}</span>
+            <span className="max-w-16 truncate text-[11px] font-bold text-ink">{user.firstName}</span>
           </>
         )}
       </button>
@@ -75,7 +87,7 @@ export function AccountMenu({ user, onProfile, onSettings, onSignOut, showName =
         <div
           ref={panelRef}
           role="menu"
-          className="absolute right-0 top-full z-30 mt-2 w-64 overflow-hidden rounded-lg border border-line bg-white shadow-float"
+          className="absolute right-0 top-full z-40 mt-2 w-64 overflow-hidden rounded-2xl border border-line bg-white shadow-float"
         >
           <div className="border-b border-line px-4 py-3">
             <p className="truncate text-sm font-extrabold">{user.firstName} {user.lastName}</p>

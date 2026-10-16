@@ -14,6 +14,8 @@ export function LogEventPage({
   onEnableAiCapture,
   records,
   isDemo,
+  voiceListening,
+  onStopVoice,
 }: {
   observation: string;
   setObservation: (value: string) => void;
@@ -23,6 +25,8 @@ export function LogEventPage({
   onEnableAiCapture: () => void;
   records: HealthRecord[];
   isDemo: boolean;
+  voiceListening: boolean;
+  onStopVoice: () => void;
 }) {
   const [dismissed, setDismissed] = useState(false);
   const showAiBanner = aiConsent !== null && !aiConsent.granted && !dismissed;
@@ -64,6 +68,21 @@ export function LogEventPage({
 
         <div className="relative mt-auto flex w-full justify-center pt-8">
           <div className="w-full max-w-xl">
+            {voiceListening && (
+              <div className="mb-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={onStopVoice}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/25"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-glow opacity-75 motion-safe:animate-ping-slow" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-glow" />
+                  </span>
+                  Listening... tap to stop
+                </button>
+              </div>
+            )}
             <ObservationComposer
               observation={observation}
               setObservation={setObservation}

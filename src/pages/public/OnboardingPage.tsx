@@ -98,7 +98,7 @@ export function OnboardingPage({
 
             {step === 1 ? (
               <div className="mt-7 grid gap-5 sm:grid-cols-2">
-                <label className="block"><span className="text-sm font-extrabold">Date of birth</span><input type="date" max={new Date().toISOString().slice(0, 10)} value={profile.dateOfBirth || ""} onChange={(event) => setProfile({ ...profile, dateOfBirth: event.target.value || null })} className="mt-2 h-12 w-full rounded-lg border border-line bg-white px-3 font-semibold outline-none focus:border-teal focus:ring-2 focus:ring-teal/10" /></label>
+                <label className="block"><span className="text-sm font-extrabold">Date of birth</span><input type="date" max={new Date().toISOString().slice(0, 10)} value={profile.dateOfBirth || ""} onChange={(event) => setProfile({ ...profile, dateOfBirth: event.target.value || null })} className="field-input mt-2 h-12 w-full px-3" /></label>
                 <SelectField label="Sex" value={profile.sex || ""} onChange={(value) => setProfile({ ...profile, sex: value || null })} options={["Female", "Male"]} />
                 <SelectField label="Blood group" value={profile.bloodGroup || ""} onChange={(value) => setProfile({ ...profile, bloodGroup: (value || null) as HealthProfileInput["bloodGroup"] })} options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]} />
                 <div className="rounded-lg border border-teal/15 bg-teal/5 p-4"><ShieldCheck className="text-teal" size={20} /><p className="mt-3 text-sm font-extrabold">Private and editable</p><p className="mt-1 text-xs font-semibold leading-5 text-muted">Only information you choose is included in your summaries.</p></div>
