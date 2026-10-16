@@ -43,24 +43,25 @@ This file is the first thing any AI agent (Claude, or otherwise) should read whe
 - Use **Conventional Commits** format for the title: `<type>(<scope>): <short summary>`
   - Common types: `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `perf`
   - `scope` is optional but preferred when the change is localized (e.g. `dashboard`, `auth`, `docs`)
-- Follow the title with bullet points of what changed. Bullets must be **specific and complete** — name the actual file(s), component(s), or behavior changed. Do not compress bullets into vague one-liners that drop key detail (e.g. not "update docs", but "add AGENT.md with token discipline, scope, and commit rules").
-- No filler, no narration of process, no explaining why it was asked — but never sacrifice specificity for brevity.
+- Follow the title with a few short bullets (about 3-6), one line each, grouped by area of change. Say plainly what was done and name the area/component touched — don't list every file or every small tweak, and don't write long multi-clause bullets.
+- Keep enough detail that the key change isn't lost (e.g. not just "update UI", but "redesign check-in card; disable save until 5+ words").
+- No filler, no narration of process, no explaining why it was asked.
 - Format:
   ```
   <type>(<scope>): <short summary>
 
-  - <specific detail of what changed, bullet 1>
-  - <specific detail of what changed, bullet 2>
+  - <what was done, bullet 1>
+  - <what was done, bullet 2>
   ```
 - Example:
   ```
-  docs(agent): add agent rules and working log
+  feat(dashboard): restyle dashboard and mobile nav to match Stitch
 
-  - Add AGENT.md at repo root with rules on token discipline, precise code
-    location before editing, scope limits, pruning docs/working.md, and
-    Conventional Commits format
-  - Seed docs/working.md (was empty) as a task timeline log with an initial
-    entry documenting this setup
+  - Update global radius, borders, shadows and color tokens
+  - Restyle quick access, quick log, health summary and side cards
+  - Redesign check-in card; disable save until 5+ words
+  - Rebuild mobile bottom nav with raised plus button
+  - Update working log
   ```
 
 ## 8. When in doubt

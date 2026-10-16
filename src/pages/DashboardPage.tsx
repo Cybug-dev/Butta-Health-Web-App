@@ -7,8 +7,8 @@ import {
   FileCheck2,
   HeartPulse,
   History,
+  Info,
   Leaf,
-  Lightbulb,
   Moon,
   Pill,
   Plus,
@@ -142,34 +142,37 @@ export function DashboardPage({
           <div className="dashboard-enter grid gap-5 lg:grid-cols-2">
             <div className="min-w-0 space-y-5">
               <section>
-                <h2 className="text-base font-extrabold">Quick access</h2>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-base font-bold tracking-tight">Quick access</h2>
+                  <span className="hidden text-xs font-medium text-faint sm:inline">Common actions</span>
+                </div>
                 <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-3">
                   {quickAccess.map(({ icon: Icon, label, view }) => (
                     <button
                       key={label}
                       type="button"
                       onClick={() => setActiveView(view)}
-                      className="surface-card flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 py-3 text-center transition hover:-translate-y-0.5 hover:border-teal/30 hover:shadow-lift"
+                      className="surface-card group flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 py-3 text-center transition duration-200 hover:-translate-y-0.5 hover:shadow-lift active:scale-95 focus:outline-none focus:ring-2 focus:ring-teal sm:p-4"
                     >
-                      <span className="grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal"><Icon size={19} /></span>
-                      <span className="w-full truncate px-0.5 text-xs font-extrabold">{label}</span>
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal transition-colors duration-200 group-hover:bg-teal group-hover:text-white sm:h-12 sm:w-12 sm:rounded-xl"><Icon size={19} strokeWidth={2.2} /></span>
+                      <span className="w-full truncate px-0.5 text-xs font-semibold text-ink/80 group-hover:text-ink">{label}</span>
                     </button>
                   ))}
                 </div>
               </section>
 
-              <section>
+              <section className="sm:rounded-lg sm:border sm:border-line sm:bg-white/80 sm:p-5 sm:shadow-card">
                 <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="text-base font-extrabold">Quick log</h2>
-                  <span className="text-xs font-semibold text-faint">Tap to start an entry</span>
+                  <h2 className="text-base font-bold tracking-tight sm:text-sm">Quick log</h2>
+                  <span className="text-xs font-medium text-faint">Tap to start an entry</span>
                 </div>
-                <div className="scroll-row -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+                <div className="scroll-row -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0">
                   {quickLogOptions.map(({ icon: Icon, label, preset }) => (
                     <button
                       key={label}
                       type="button"
                       onClick={() => onQuickLog(preset)}
-                      className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border border-line bg-white px-3.5 text-sm font-bold text-ink transition hover:border-teal/40 hover:text-teal"
+                      className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border border-line bg-white px-4 text-xs font-bold text-ink shadow-sm transition active:bg-teal/10 sm:min-h-0 sm:rounded-xl sm:border-teal/15 sm:bg-teal/5 sm:px-3.5 sm:py-2 sm:font-semibold sm:shadow-none sm:hover:border-teal/30 sm:hover:bg-teal/10"
                     >
                       <Icon size={16} className="text-teal" />
                       {label}
@@ -191,8 +194,8 @@ export function DashboardPage({
 
           <section className="dashboard-enter">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-base font-extrabold">Health summary</h2>
-              <button type="button" onClick={() => setActiveView("timeline")} className="text-sm font-extrabold text-teal hover:text-tealDark">See all</button>
+              <h2 className="text-base font-bold tracking-tight">Health summary</h2>
+              <button type="button" onClick={() => setActiveView("timeline")} className="text-xs font-semibold text-teal hover:text-tealDark hover:underline">See all</button>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <DashboardMetric
@@ -213,7 +216,7 @@ export function DashboardPage({
                 progress={completion}
                 onClick={() => setActiveView("profile")}
               />
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-2 h-full sm:col-span-1">
                 <DashboardMetric
                   icon={latestRecord?.type === "MEDICATION" ? Pill : HeartPulse}
                   label="Latest event"
@@ -278,20 +281,21 @@ export function DashboardPage({
 
         <aside className="dashboard-rail-enter space-y-4 xl:fixed xl:bottom-0 xl:right-0 xl:top-[72px] xl:z-20 xl:flex xl:w-[320px] xl:flex-col xl:overflow-y-auto xl:border-l xl:border-line xl:bg-paper xl:p-4">
           <section className="surface-card rounded-lg p-5">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal"><Lightbulb size={19} /></span>
-            <h2 className="mt-3 text-base font-extrabold">Log it while it is fresh</h2>
-            <p className="mt-1.5 text-sm leading-6 text-muted">Note when it started, how strong it felt, and what helped. Small details make your visit brief more useful.</p>
-            <button type="button" onClick={() => setActiveView("capture")} className="mt-3 inline-flex items-center gap-2 text-sm font-extrabold text-teal hover:text-tealDark">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-teal/10 text-teal"><Info size={16} /></span>
+            <h2 className="mt-3 text-sm font-bold text-ink">Log it while it is fresh</h2>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted">Note when it started, how strong it felt, and what helped. Small details make your visit brief more useful.</p>
+            <button type="button" onClick={() => setActiveView("capture")} className="group mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-teal transition hover:text-tealDark">
               Start an entry
-              <ArrowRight size={16} />
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </button>
           </section>
 
-          <section className="relative min-h-40 flex-1 overflow-hidden rounded-lg border border-teal/10 bg-well p-5 text-center">
+          <section className="relative flex min-h-40 flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border border-line bg-gradient-to-b from-mist to-paper p-5 text-center shadow-card">
             <img src="/assets/butta-sidebar-botanical.png" alt="" className="absolute inset-0 h-full w-full object-cover object-bottom opacity-35" />
-            <div className="relative px-3 py-4">
-              <Leaf className="mx-auto text-teal" size={22} fill="currentColor" strokeWidth={1.4} />
-              <p className="mt-3 text-sm font-extrabold leading-6 text-tealDark">A healthier you starts with a clearer story.</p>
+            <div className="relative">
+              <span className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-teal/15 text-tealDark"><Leaf size={16} fill="currentColor" strokeWidth={1.4} /></span>
+              <p className="mt-2.5 text-sm font-bold leading-snug text-ink">A healthier you starts with a clearer story.</p>
+              <p className="mx-auto mt-1.5 max-w-xs text-[11px] leading-relaxed text-muted">Every symptom log brings clarity to your next clinical consultation.</p>
             </div>
           </section>
         </aside>

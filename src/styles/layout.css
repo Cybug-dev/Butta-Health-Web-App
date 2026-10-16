@@ -24,9 +24,4 @@
   .view-panel div {
     max-width: 100%;
   }
-
-  .surface-card,
-  .soft-card {
-    box-shadow: 0 1px 2px rgba(27, 52, 45, 0.04), 0 8px 22px rgba(27, 52, 45, 0.055);
-  }
 }
