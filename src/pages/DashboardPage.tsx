@@ -275,52 +275,61 @@ export function DashboardPage({
             </div>
           </section>
 
-          <section className="surface-card dashboard-enter overflow-hidden rounded-lg">
-            <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-              <div>
-                <h2 className="text-lg font-extrabold">Recent health events</h2>
-                <p className="mt-0.5 text-xs font-semibold text-muted">Your newest recorded observations</p>
+          <section className="surface-card dashboard-enter rounded-3xl p-5">
+            <div className="mb-4 flex items-baseline justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-sm font-extrabold tracking-tight sm:text-base">Recent health events</h2>
+                <p className="text-[11px] font-medium text-faint sm:text-xs">Your newest recorded observations</p>
               </div>
-              <button type="button" onClick={() => setActiveView("timeline")} className="inline-flex items-center gap-2 text-sm font-extrabold text-teal hover:text-tealDark">
+              <button type="button" onClick={() => setActiveView("timeline")} className="group inline-flex shrink-0 items-center gap-0.5 text-xs font-bold text-leaf hover:underline">
                 View all
-                <ArrowRight size={16} />
+                <ChevronRight size={14} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
-            <div className="min-h-[284px]">
-              {loading ? (
-                <div className="grid min-h-[284px] place-items-center text-sm font-semibold text-muted">Loading your health history...</div>
-              ) : recentRecords.length ? (
-                recentRecords.map((record) => (
-                  <button
-                    key={record.id}
-                    type="button"
-                    onClick={() => setActiveView("timeline")}
-                    className="group grid w-full grid-cols-[64px_42px_minmax(0,1fr)_20px] items-center gap-3 border-b border-line px-5 py-3.5 text-left last:border-b-0 hover:bg-well/60"
-                  >
-                    <span className="text-xs font-extrabold leading-4 text-muted">
-                      {new Intl.DateTimeFormat("en", { month: "short", day: "2-digit" }).format(new Date(record.eventDate))}
-                      <span className="block font-semibold text-faint">{new Date(record.eventDate).getFullYear()}</span>
-                    </span>
-                    <HealthEventIcon record={record} />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-extrabold text-ink">{record.title}</span>
-                      <span className="mt-0.5 block truncate text-xs font-semibold text-muted">
-                        {record.symptoms.slice(0, 2).join(", ") || record.notes}
+            {loading ? (
+              <div className="grid min-h-40 place-items-center text-xs font-medium text-muted">Loading your health history...</div>
+            ) : recentRecords.length ? (
+              <div className="space-y-1.5">
+                {recentRecords.map((record) => {
+                  const date = new Date(record.eventDate);
+                  const isToday = date.toDateString() === now.toDateString();
+                  return (
+                    <button
+                      key={record.id}
+                      type="button"
+                      onClick={() => setActiveView("timeline")}
+                      className="group -mx-2.5 flex w-[calc(100%+1.25rem)] items-center justify-between gap-2 rounded-2xl px-2.5 py-2.5 text-left transition hover:bg-teal/5"
+                    >
+                      <span className="flex min-w-0 flex-1 items-start gap-3">
+                        <span className="mt-0.5"><HealthEventIcon record={record} /></span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-xs font-bold leading-snug text-ink sm:text-sm">{record.title}</span>
+                          <span className="mb-1 block truncate text-[11px] text-muted sm:text-xs">{record.symptoms.slice(0, 2).join(", ") || record.notes}</span>
+                          {isToday ? (
+                            <span className="inline-flex items-center rounded border border-teal/15 bg-teal/5 px-1.5 py-0.5 text-[10px] font-semibold text-leaf">
+                              Today • {new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" }).format(date)}
+                            </span>
+                          ) : (
+                            <span className="block text-[10px] font-medium text-faint">
+                              {new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(date)}
+                            </span>
+                          )}
+                        </span>
                       </span>
-                    </span>
-                    <ChevronRight size={17} className="text-faint transition group-hover:translate-x-0.5 group-hover:text-teal" />
-                  </button>
-                ))
-              ) : (
-                <div className="grid min-h-[284px] place-items-center px-6 text-center">
-                  <div>
-                    <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-teal/10 text-teal"><Plus size={20} /></span>
-                    <p className="mt-3 text-sm font-extrabold">No health events yet</p>
-                    <button type="button" onClick={() => setActiveView("capture")} className="mt-2 text-sm font-bold text-teal">Log your first event</button>
-                  </div>
+                      <ChevronRight size={16} className="shrink-0 text-faint/60 transition group-hover:translate-x-0.5 group-hover:text-leaf" />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid min-h-40 place-items-center text-center">
+                <div>
+                  <span className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-teal/10 text-teal"><Plus size={18} /></span>
+                  <p className="mt-3 text-sm font-extrabold">No health events yet</p>
+                  <button type="button" onClick={() => setActiveView("capture")} className="mt-1.5 text-xs font-bold text-leaf hover:underline">Log your first event</button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </section>
         </div>
 

@@ -28,10 +28,10 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 - White logo/avatar/"Log how I feel"/quick-access hover were caused by stale dev servers (ports 5173/5174 served CSS without `leaf` classes); code was correct. Fresh `npm run dev` fixes it.
 - `NotificationBell` unified: one bell style + one `bg-rose-500` badge for desktop and mobile (no variants). Removed `alert` token; check-in mic listening state uses rose.
 - Mobile avatar pill and bell made smaller; mobile insights button matches bell style.
+- "Recent health events" redesigned to the UPDATED v2 mobile screen (Stitch regenerated it; always re-fetch `htmlCode` before using a screen). Rows: round type icon (`HealthEventIcon`, 36px, rose heart for symptoms, green check for check-ins), title, snippet, date below ("Today • time" pill or plain date), faint chevron. No date column/connector. Rows use `-mx-2.5 px-2.5` so content aligns flush with the heading. Health summary unchanged.
 
 **Left / next:**
 - Visually check desktop (sidebar collapse/expand, header) and mobile; restart dev server first (tailwind config changed).
-- "Recent health events" section intentionally untouched; user will redesign it later.
 - Uncommitted: this work plus the previous Stitch restyle.
 
 ---
