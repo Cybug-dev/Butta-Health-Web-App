@@ -40,6 +40,19 @@
   height: 4.25rem;
 }
 
+.waveform-bar {
+  animation: waveform-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes waveform-pulse {
+  from {
+    height: 4px;
+  }
+  to {
+    height: 20px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -48,6 +61,12 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* The waveform is the only cue that the mic is live, so it keeps moving. */
+  .waveform-bar {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
   }
 
   .public-header,

@@ -2,40 +2,32 @@
 
 Running timeline of tasks worked on this project. New agents/sessions should read the **latest entry** first to know current state. Keep this file lean (see AGENT.md section 6).
 
+**Stitch reference:** project `15447309545437068049`. User's naming: **v1** = "Fluid Glass & Tactile Depth" screens (red badge), **v2** = "Dimensional Bento & Neo-Biotech" screens (green badge). Stitch regenerates screens: always re-fetch `htmlCode` (list_screens) before using one.
+
 ---
 
 ## Current / latest
 
-### 2026-10-16 — Home screen refinement from Stitch variants (v1/v2)
-**Source:** Stitch project `15447309545437068049`. Naming the user uses:
-- Desktop **v1** = "Collapsed Rail (Fluid Glass & Tactile Depth)"; desktop **v2** = "Collapsed Rail (Dimensional Bento & Neo-Biotech)" (has expand button, glowing logo, "Vault Encrypted").
-- Mobile **v1** = "Fluid Glass & Tactile Depth (Mobile)" (red badge); mobile **v2** = "Dimensional Bento & Neo-Biotech (Mobile)" (green badge).
+### 2026-10-16 — Log Event screen from Stitch ("Log Event" v1/v2 mobile)
+**User decisions:** order = AI banner (v1, no icon) → log card (v2) → stat cards (v1) → Your history (v2) → Detected entities (v2). Stat band = existing 3 metrics + Stitch "Timeline status" (4 cards, shared `HeaderBand`; on Log Event it sits below the log card). Log Observation / Confirm & save / Edit fields all open the review modal; review modal restyled to v2 clinical-extraction UI. Mobile scroll rows must reach the screen edge.
 
-**User decisions:** desktop health summary = 3 columns, 3rd is the Latest event card (mobile: 2 cards + latest row beneath). Sidebar collapsed by default, choice remembered. Mic/Voice note = browser speech-to-text, hidden where unsupported. Right rail cards: only radius/border/shadow changed.
-
-**Done (tsc + eslint + vite build pass; NOT visually verified in a browser):**
-- Global: v1 desktop card/hover shadows (`card`, `paper`, `lift`), v1 chip shadows, new tokens `glow`, `alert`, `track`, `barIdle`, `ping-slow` and `fade-in` animations. `.surface-card`/`.soft-card` use v1 shadow.
-- Shared `.field-input` (styles/components.css) = v2/v1 mobile input look; applied to all form inputs, selects and searches (FormFields, AuthFields, AuthPage, Onboarding date, Settings time, History search, ConfirmModal select, topbar + dashboard search, check-in textarea). Not applied to the Log Event composer bubble.
-- Sidebar (`Sidebar.tsx`, `useSidebarCollapsed.ts`, `HealthWorkspace.tsx`): v1 collapsed rail (80px); hovering blank rail space swaps logo for an expand icon; clicking blank space/icon expands to the existing sidebar (width + margin transition, content fades in); collapse button in expanded header.
-- Desktop topbar: v1-mobile-style search with long placeholder, v2 "Vault Encrypted" pill, v2 bell (rose badge), divider, v2 profile chip (`AccountMenu` `variant="desktop"`). New shared `NotificationBell.tsx`.
-- Mobile topbar: v2 structure (leaf tile, name/tagline, round bell with v1 red `alert` badge, avatar pill `variant="mobile"`), no Vault pill.
-- Dashboard (`DashboardPage.tsx`): greeting has morning/afternoon/night icon (`getDayPeriod` in utils/format.ts); v2 date chip, short date on mobile, wraps under greeting when narrow. Banner content = v2 (blinking "Quick log" dot, longer copy, Log how I feel + Voice note, icon-only on mobile); image kept. Quick access/log: v1 radius/shadows, "Common actions" on mobile, compact mobile text, v1 chips. Right rail cards rounded-3xl.
-- Check-in (`DailyCheckInCard.tsx`): v2 desktop warm corner glow, v2 mobile content (Daily Bio-Pulse, Private badge, Auto-encrypted), shared input with v1 mic (dictation), 5-word rule kept.
-- Health summary: `DashboardMetric.tsx` rewritten to v1 mobile style (7-day activity bar chart + profile progress from real dashboard data); new `LatestEventCard.tsx` (row on mobile, card on sm+; routes to history, or Log Event when empty).
-- Voice: `useDictation.ts` (Web Speech API). Voice note opens Log Event and dictates into it (listening pill in `LogEventPage.tsx`; composer auto-expands on text).
-
-**Follow-up fixes:**
-- White logo/avatar/"Log how I feel"/quick-access hover were caused by stale dev servers (ports 5173/5174 served CSS without `leaf` classes); code was correct. Fresh `npm run dev` fixes it.
-- `NotificationBell` unified: one bell style + one `bg-rose-500` badge for desktop and mobile (no variants). Removed `alert` token; check-in mic listening state uses rose.
-- Mobile avatar pill and bell made smaller; mobile insights button matches bell style.
-- "Recent health events" redesigned to the UPDATED v2 mobile screen (Stitch regenerated it; always re-fetch `htmlCode` before using a screen). Rows: round type icon (`HealthEventIcon`, 36px, rose heart for symptoms, green check for check-ins), title, snippet, date below ("Today • time" pill or plain date), faint chevron. No date column/connector. Rows use `-mx-2.5 px-2.5` so content aligns flush with the heading. Health summary unchanged.
+**Done (tsc pass; NOT visually verified in a browser):**
+- `LogEventPage.tsx` rebuilt in that order; desktop puts history + entities side by side (lg).
+- `ObservationComposer.tsx` rewritten as v2 always-open glass console: status badge, transcript textarea with mic inside, waveform (`animate-wave`) only while audio is actually captured (`useDictation` `capturing` via onaudiostart/onaudioend), Photo + Tags buttons, Log Observation CTA. Tags + attachments lifted to the page (`hooks/useAttachments.ts`).
+- `HeaderBand.tsx`: v1 card style, 4 cards, edge-to-edge horizontal scroll on mobile.
+- `ClinicalPanel.tsx`: v2 "Your history" card; chevron expands the 48h list.
+- `ExtractionPreview.tsx`: v2 Detected entities (type, severity meter, title, fields grid, Edit fields / Confirm & save) + shared pieces (`ExtractionHeader`, `DraftBadge`, `EntityTile`, `SeverityMeter`, `FieldGrid`) reused by `ConfirmModal.tsx` (v2 restyle, severity as segmented buttons, same save flow).
+- `layout.css`: `.view-panel .scroll-row { max-width: none }` — the mobile `max-width:100%` rule was clipping negative-margin scroll rows (stat band + dashboard quick log) short of the screen edge.
+- `HealthWorkspace.tsx`: Log Event gets metrics + shared voice controls; source "Voice" when dictation was used.
+- Follow-up: banner keeps its ORIGINAL background (wellness-workspace.png + #173f35 overlays) — only content is v2. Waveform uses plain CSS `.waveform-bar` in motion.css (no config dependency, exempt from the reduced-motion kill rule); `capturing` turns on at recognition `onstart`/`onaudiostart`. Review modal is centered (flex) on sm+, bottom sheet on mobile.
 
 **Left / next:**
-- Visually check desktop (sidebar collapse/expand, header) and mobile; restart dev server first (tailwind config changed).
-- Uncommitted: this work plus the previous Stitch restyle.
+- Visually check Log Event (mobile + desktop), mic permission flow and waveform, review modal; restart dev server (tailwind config changed).
+- Uncommitted.
 
 ---
 
 ## Completed (archive)
 - 2026-10-16: Created AGENT.md (agent rules) and seeded this log.
-- 2026-10-16: First Stitch restyle (Refined Desktop/Mobile Dashboard): global radius 16/12px, `line` = #E4ECE6, amber scale, check-in 5-word minimum, Stitch mobile bottom nav with `#2D5B46` FAB at 68px height.
+- 2026-10-16: First Stitch restyle (Refined Desktop/Mobile Dashboard): global radius 16/12px, `line` = #E4ECE6, amber scale, 5-word check-in minimum, Stitch mobile bottom nav.
+- 2026-10-16: Home screen from v1/v2: collapsible sidebar rail (`useSidebarCollapsed`), header (Vault pill, shared `NotificationBell` with rose badge, `AccountMenu` variants), greeting period icon, v2 banner + Voice note, v2 check-in, v1-mobile health summary + `LatestEventCard`, v2 recent events list, shared `.field-input`, v1 shadows, `useDictation`. Stale dev servers once caused white elements (restart fixes).

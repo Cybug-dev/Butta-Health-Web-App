@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ClinicalPanel } from "../components/capture/ClinicalPanel";
 import { ExtractionPreview } from "../components/capture/ExtractionPreview";
-import { ObservationComposer } from "../components/capture/ObservationComposer";
+import { ObservationComposer, type VoiceControls } from "../components/capture/ObservationComposer";
+import { HeaderBand } from "../components/layout/HeaderBand";
 import { presets } from "../data";
+import { useAttachments } from "../hooks/useAttachments";
 import type { AiConsent, ExtractedRecord, HealthRecord } from "../types";
 
 export function LogEventPage({
@@ -13,9 +15,10 @@ export function LogEventPage({
   aiConsent,
   onEnableAiCapture,
   records,
+  metrics,
   isDemo,
-  voiceListening,
-  onStopVoice,
+  voice,
+  source,
 }: {
   observation: string;
   setObservation: (value: string) => void;
@@ -24,32 +27,45 @@ export function LogEventPage({
   aiConsent: AiConsent | null;
   onEnableAiCapture: () => void;
   records: HealthRecord[];
+  metrics: { monitoring: number; symptoms: number; records: number };
   isDemo: boolean;
-  voiceListening: boolean;
-  onStopVoice: () => void;
+  voice: VoiceControls;
+  source: ExtractedRecord["source"];
 }) {
   const [dismissed, setDismissed] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const attachments = useAttachments();
   const showAiBanner = aiConsent !== null && !aiConsent.granted && !dismissed;
+  const canReview = !extracting && (observation.trim().length > 0 || tags.length > 0 || attachments.attachments.length > 0);
+
+  function toggleTag(tag: string) {
+    setTags((current) => (current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]));
+  }
+
+  function review() {
+    if (canReview) openConfirm(source, attachments.ids, tags);
+  }
 
   return (
     <div className="space-y-5">
       {showAiBanner && (
-        <div className="stagger-in flex flex-col items-start justify-between gap-3 rounded-lg border border-teal/25 bg-teal/5 p-4 sm:flex-row sm:items-center">
-          <p className="text-sm font-semibold leading-6 text-tealDark">
+        <section className="stagger-in rounded-2xl border border-teal/25 bg-mist p-4 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-5">
+          <p className="mb-3 text-xs font-medium leading-relaxed text-tealDark sm:mb-0">
             Turn on AI-assisted capture in Settings for smarter, more accurate extraction from what you type. You will always review and confirm before anything is saved.
           </p>
-          <div className="flex shrink-0 gap-2">
-            <button type="button" onClick={onEnableAiCapture} className="min-h-10 rounded-lg bg-teal px-4 text-sm font-extrabold text-white transition hover:bg-tealDark">
+          <div className="flex shrink-0 items-center gap-2.5">
+            <button type="button" onClick={onEnableAiCapture} className="rounded-xl bg-teal px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal/30 transition hover:bg-tealDark active:scale-95">
               Turn on
             </button>
-            <button type="button" onClick={() => setDismissed(true)} className="min-h-10 rounded-lg border border-line bg-white px-4 text-sm font-extrabold text-muted transition hover:bg-well">
+            <button type="button" onClick={() => setDismissed(true)} className="rounded-xl border border-teal/25 bg-white px-4 py-2 text-xs font-bold text-teal transition hover:bg-white/80 active:scale-95">
               Not now
             </button>
           </div>
-        </div>
+        </section>
       )}
+
       <section
-        className="stagger-in relative flex min-h-[420px] w-full flex-col overflow-hidden rounded-lg bg-cover bg-center p-5 sm:p-7"
+        className="stagger-in relative overflow-hidden rounded-3xl bg-cover bg-center p-5 text-white shadow-xl shadow-leaf/20 sm:p-7"
         style={{ backgroundImage: "url('/assets/wellness-workspace.png')" }}
         role="img"
         aria-label="Warm desk with health journal, water, medication organizer, tablet, and smartwatch"
@@ -57,48 +73,32 @@ export function LogEventPage({
         <div className="absolute inset-0 bg-[#173f35]/55" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#173f35]/90 via-[#173f35]/55 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#173f35]/80 via-transparent to-transparent" />
-        <div className="relative min-w-0 max-w-2xl">
-          <h2 className="max-w-full break-words font-serif text-3xl leading-[1.12] text-white sm:text-4xl">
-            How are you feeling right now?
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-white/80">
+        <div className="relative z-10 lg:max-w-3xl">
+          <h2 className="mb-2 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">How are you feeling right now?</h2>
+          <p className="mb-5 max-w-[95%] text-xs leading-relaxed text-mist/90 sm:text-sm">
             Type in plain language. Butta organizes the details into editable medical fields before anything is saved.
           </p>
-        </div>
-
-        <div className="relative mt-auto flex w-full justify-center pt-8">
-          <div className="w-full max-w-xl">
-            {voiceListening && (
-              <div className="mb-3 flex justify-center">
-                <button
-                  type="button"
-                  onClick={onStopVoice}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/25"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-glow opacity-75 motion-safe:animate-ping-slow" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-glow" />
-                  </span>
-                  Listening... tap to stop
-                </button>
-              </div>
-            )}
-            <ObservationComposer
-              observation={observation}
-              setObservation={setObservation}
-              extracting={extracting}
-              onSubmit={(attachmentIds, symptomTags) => void openConfirm("Typed", attachmentIds, symptomTags)}
-              allowAttachments={!isDemo}
-              symptomTagOptions={presets}
-            />
-          </div>
+          <ObservationComposer
+            observation={observation}
+            setObservation={setObservation}
+            tags={tags}
+            onToggleTag={toggleTag}
+            symptomTagOptions={presets}
+            attachments={attachments}
+            allowAttachments={!isDemo}
+            voice={voice}
+            extracting={extracting}
+            onSubmit={review}
+          />
         </div>
       </section>
 
-      <section className="stagger-in grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+      <HeaderBand metrics={metrics} className="" />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-start">
         <ClinicalPanel records={records} />
-        <ExtractionPreview observation={observation} />
-      </section>
+        <ExtractionPreview observation={observation} tags={tags} disabled={!canReview} onEdit={review} onConfirm={review} />
+      </div>
     </div>
   );
 }

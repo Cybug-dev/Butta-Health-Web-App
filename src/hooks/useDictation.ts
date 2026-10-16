@@ -7,6 +7,9 @@ type SpeechRecognitionInstance = {
   continuous: boolean;
   interimResults: boolean;
   onresult: ((event: { resultIndex: number; results: SpeechResultList }) => void) | null;
+  onstart: (() => void) | null;
+  onaudiostart: (() => void) | null;
+  onaudioend: (() => void) | null;
   onend: (() => void) | null;
   onerror: (() => void) | null;
   start: () => void;
@@ -30,6 +33,7 @@ export function appendDictation(current: string, addition: string) {
 export function useDictation(onText: (text: string) => void) {
   const supported = Boolean(getRecognition());
   const [listening, setListening] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const onTextRef = useRef(onText);
 
@@ -59,7 +63,11 @@ export function useDictation(onText: (text: string) => void) {
     const finish = () => {
       recognitionRef.current = null;
       setListening(false);
+      setCapturing(false);
     };
+    recognition.onstart = () => setCapturing(true);
+    recognition.onaudiostart = () => setCapturing(true);
+    recognition.onaudioend = () => setCapturing(false);
     recognition.onend = finish;
     recognition.onerror = finish;
     recognitionRef.current = recognition;
@@ -74,5 +82,5 @@ export function useDictation(onText: (text: string) => void) {
 
   useEffect(() => () => recognitionRef.current?.abort(), []);
 
-  return { supported, listening, start, stop, toggle };
+  return { supported, listening, capturing, start, stop, toggle };
 }

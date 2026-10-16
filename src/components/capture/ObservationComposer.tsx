@@ -1,328 +1,210 @@
-import gsap from "gsap";
-import { ArrowRight, ImagePlus, Plus, X } from "lucide-react";
-import {
-  type ChangeEvent,
-  type KeyboardEvent,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { ApiError, buttaApi } from "../../services/api";
+import { ArrowRight, ImagePlus, Mic, Plus, X } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
+import type { AttachmentsState } from "../../hooks/useAttachments";
 import { AttachmentGalleryModal, AttachmentThumb, type LocalAttachment } from "./AttachmentGallery";
 import { TagPickerPortal } from "./TagPicker";
+
+export type VoiceControls = {
+  supported: boolean;
+  listening: boolean;
+  capturing: boolean;
+  toggle: () => void;
+};
+
+const WAVE_DURATIONS = ["0.9s", "1.3s", "0.7s", "1.1s", "0.8s"];
 
 export function ObservationComposer({
   observation,
   setObservation,
-  onSubmit,
-  extracting,
-  allowAttachments,
+  tags,
+  onToggleTag,
   symptomTagOptions,
+  attachments,
+  allowAttachments,
+  voice,
+  extracting,
+  onSubmit,
 }: {
   observation: string;
   setObservation: (value: string) => void;
-  onSubmit: (attachmentIds: string[], symptomTags: string[]) => void;
-  extracting: boolean;
-  allowAttachments: boolean;
+  tags: string[];
+  onToggleTag: (tag: string) => void;
   symptomTagOptions: string[];
+  attachments: AttachmentsState;
+  allowAttachments: boolean;
+  voice: VoiceControls;
+  extracting: boolean;
+  onSubmit: () => void;
 }) {
-  const [expanded, setExpanded] = useState(observation.trim().length > 0);
-  const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const [activePreview, setActivePreview] = useState<{ attachment: LocalAttachment; rect: DOMRect } | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagPickerOpen, setTagPickerOpen] = useState(false);
-
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [activePreview, setActivePreview] = useState<{ attachment: LocalAttachment; rect: DOMRect } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const thumbRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
-  const fileChooserOpenRef = useRef(false);
   const tagsButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const hasContent = observation.trim().length > 0 || attachments.length > 0 || selectedTags.length > 0;
-
-  useLayoutEffect(() => {
-    if (!cardRef.current) return;
-    const context = gsap.context(() => {
-      gsap.to(cardRef.current, {
-        maxHeight: expanded ? 320 : 56,
-        duration: 0.45,
-        ease: "back.out(1.1)",
-      });
-    }, cardRef);
-    return () => context.revert();
-  }, [expanded]);
-
   const hasText = observation.trim().length > 0;
-  useEffect(() => {
-    if (hasText) setExpanded(true);
-  }, [hasText]);
-
-  useEffect(() => {
-    if (expanded && textareaRef.current) {
-      const timer = setTimeout(() => textareaRef.current?.focus(), 60);
-      return () => clearTimeout(timer);
-    }
-  }, [expanded]);
+  const hasContent = hasText || attachments.attachments.length > 0 || tags.length > 0;
 
   useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "0px";
-    el.style.height = `${Math.max(28, Math.min(el.scrollHeight, 160))}px`;
-  }, [observation, expanded]);
+    el.style.height = `${Math.max(72, Math.min(el.scrollHeight, 220))}px`;
+  }, [observation]);
 
-  useEffect(() => {
-    function onWindowFocus() {
-      // The file chooser dialog is a native OS window; the page only regains
-      // focus once it's dismissed (file picked or cancelled either way), so
-      // this is the reliable signal to stop treating the composer as "mid
-      // interaction" for the textarea's blur-based collapse below.
-      fileChooserOpenRef.current = false;
-    }
-    window.addEventListener("focus", onWindowFocus);
-    return () => window.removeEventListener("focus", onWindowFocus);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      attachments.forEach((attachment) => URL.revokeObjectURL(attachment.previewUrl));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function collapseIfEmpty() {
-    if (!hasContent && !fileChooserOpenRef.current) setExpanded(false);
-  }
-
-  function openFileChooser() {
-    fileChooserOpenRef.current = true;
-    fileInputRef.current?.click();
-  }
-
-  async function handleFilesChosen(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []).filter((file) => file.type.startsWith("image/"));
-    event.target.value = "";
-    if (files.length === 0) return;
-
-    const room = Math.max(0, 6 - attachments.length);
-    const accepted = files.slice(0, room);
-    if (accepted.length === 0) return;
-
-    setUploading(true);
-    setUploadError("");
-    try {
-      const { attachments: uploaded } = await buttaApi.uploadAttachments(accepted);
-      const withPreviews: LocalAttachment[] = uploaded.map((attachment, index) => ({
-        ...attachment,
-        previewUrl: URL.createObjectURL(accepted[index]!),
-        file: accepted[index]!,
-      }));
-      setAttachments((current) => [...current, ...withPreviews]);
-    } catch (error) {
-      setUploadError(error instanceof ApiError ? error.message : "Your images could not be uploaded.");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  function removeAttachment(id: string) {
-    setAttachments((current) => {
-      const target = current.find((attachment) => attachment.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
-      return current.filter((attachment) => attachment.id !== id);
-    });
-    thumbRefs.current.delete(id);
-  }
-
-  function handleSubmit() {
-    if (!hasContent || extracting) return;
-    onSubmit(attachments.map((attachment) => attachment.id), selectedTags);
-  }
-
-  function toggleTag(tag: string) {
-    setSelectedTags((current) =>
-      current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag],
-    );
-  }
-
-  function onTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Escape" && !hasContent) {
-      setExpanded(false);
-      textareaRef.current?.blur();
-    }
-  }
+  const status = extracting ? "Analyzing" : hasText ? "Ready to parse" : "Waiting for input";
 
   return (
-    <div ref={rootRef} className="w-full">
+    <div className="w-full">
       <input
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/heic"
         multiple
-        onChange={(event) => void handleFilesChosen(event)}
+        onChange={(event) => {
+          void attachments.addFiles(event.target.files);
+          event.target.value = "";
+        }}
         className="hidden"
         tabIndex={-1}
         aria-hidden="true"
       />
 
-      <div
-        ref={cardRef}
-        onMouseDown={(event) => {
-          if (event.target !== textareaRef.current && expanded) {
-            textareaRef.current?.focus();
-          }
-        }}
-        onBlur={(event) => {
-          if (rootRef.current?.contains(event.relatedTarget as Node)) return;
-          collapseIfEmpty();
-        }}
-        style={{ maxHeight: expanded ? 420 : 56, overflow: "hidden" }}
-        className={`group min-w-0 rounded-[28px] border border-white/30 bg-white/20 p-4 shadow-float backdrop-blur-xl transition-colors duration-200 ${
-          expanded ? "cursor-text" : "cursor-pointer"
-        } focus-within:border-white/50 focus-within:bg-white/25 focus-within:ring-4 focus-within:ring-white/10`}
-      >
-        {!expanded ? (
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            className="flex h-6 w-full items-center text-left text-sm font-medium text-white/70 outline-none"
-          >
-            Describe sensations, onset, severity, timing, medications, or context.
-          </button>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/70">Natural language transcript</span>
-              <span
-                className={`badge border backdrop-blur-sm transition-colors duration-200 ${
-                  extracting
-                    ? "border-gold/40 bg-gold/20 text-gold"
-                    : "border-white/30 bg-white/10 text-white/80"
-                }`}
-              >
-                <span className={`badge-dot ${extracting ? "animate-pulse" : ""}`} />
-                <span>{extracting ? "Analyzing" : "Ready to parse"}</span>
+      <div className="space-y-3 rounded-2xl border border-white/20 bg-black/30 p-4 shadow-inner backdrop-blur-md">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-mist/90">Natural language transcript</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-mist">
+            <span className={`h-1.5 w-1.5 rounded-full ${extracting ? "bg-gold motion-safe:animate-pulse" : hasText ? "bg-glow" : "bg-white/40"}`} />
+            {status}
+          </span>
+        </div>
+
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={observation}
+            onChange={(event) => setObservation(event.target.value)}
+            rows={3}
+            aria-label="Describe how you feel"
+            placeholder="Describe sensations, onset, severity, timing, medications, or context."
+            className={`block w-full resize-none border-0 bg-transparent p-0 text-sm font-medium leading-relaxed tracking-tight text-white outline-none placeholder:font-normal placeholder:text-white/50 focus:outline-none focus:ring-0 sm:text-base ${voice.supported ? "pr-10" : ""}`}
+          />
+          {voice.supported && (
+            <button
+              type="button"
+              onClick={voice.toggle}
+              aria-label={voice.listening ? "Stop voice input" : "Speak your observation"}
+              aria-pressed={voice.listening}
+              title={voice.listening ? "Stop voice input" : "Speak your observation"}
+              className={`absolute bottom-0 right-0 rounded-xl p-1.5 transition-colors ${
+                voice.listening ? "bg-rose-500/20 text-rose-200" : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Mic size={16} />
+            </button>
+          )}
+        </div>
+
+        {(attachments.attachments.length > 0 || tags.length > 0) && (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span key={tag} className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 py-1 pl-3 pr-1.5 text-xs font-semibold text-white">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => onToggleTag(tag)}
+                  className="grid h-4 w-4 place-items-center rounded-full text-white/70 hover:bg-white/20 hover:text-white"
+                  aria-label={`Remove ${tag} tag`}
+                >
+                  <X size={10} />
+                </button>
               </span>
-            </div>
-
-            <textarea
-              ref={textareaRef}
-              value={observation}
-              onChange={(event) => setObservation(event.target.value)}
-              onKeyDown={onTextareaKeyDown}
-              rows={1}
-              style={{ outline: "none", boxShadow: "none" }}
-              className="w-full resize-none overflow-hidden border-0 bg-transparent text-base leading-7 text-white outline-none ring-0 placeholder:text-white/50 focus:outline-none focus:ring-0"
-              placeholder="Describe sensations, onset, severity, timing, medications, or context."
-            />
-
-            {(attachments.length > 0 || selectedTags.length > 0) && (
-              <div className="flex flex-wrap gap-2">
-                {selectedTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 py-1.5 pl-3 pr-2 text-xs font-semibold text-white"
-                  >
-                    {tag}
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => toggleTag(tag)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          toggleTag(tag);
-                        }
-                      }}
-                      className="grid h-4 w-4 cursor-pointer place-items-center rounded-full text-white/70 hover:bg-white/20 hover:text-white"
-                      aria-label={`Remove ${tag} tag`}
-                    >
-                      <X size={10} />
-                    </span>
-                  </span>
-                ))}
-                {attachments.map((attachment) => (
-                  <AttachmentThumb
-                    key={attachment.id}
-                    attachment={attachment}
-                    onRemove={() => removeAttachment(attachment.id)}
-                    onOpen={(rect) => setActivePreview({ attachment, rect })}
-                    registerRef={(el) => thumbRefs.current.set(attachment.id, el)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {uploadError && (
-              <p role="alert" className="text-xs font-semibold text-rust">{uploadError}</p>
-            )}
-
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-1">
-                {symptomTagOptions.length > 0 && (
-                  <button
-                    ref={tagsButtonRef}
-                    type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => setTagPickerOpen((open) => !open)}
-                    className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors duration-200 hover:bg-white/15 hover:text-white ${
-                      tagPickerOpen ? "bg-white/15 text-white" : "text-white/70"
-                    }`}
-                  >
-                    <Plus size={15} />
-                    Tags
-                  </button>
-                )}
-                {allowAttachments && (
-                  <button
-                    type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={openFileChooser}
-                    disabled={uploading || attachments.length >= 6}
-                    className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold text-white/70 transition-colors duration-200 hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <ImagePlus size={15} />
-                    {uploading ? "Uploading" : "Add photo"}
-                  </button>
-                )}
-
-                {tagPickerOpen && (
-                  <TagPickerPortal
-                    anchorRef={tagsButtonRef}
-                    options={symptomTagOptions}
-                    selected={selectedTags}
-                    onToggle={toggleTag}
-                    onClose={() => setTagPickerOpen(false)}
-                  />
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={extracting || !hasContent}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-teal px-6 py-2.5 font-semibold text-paper transition-all duration-200 hover:bg-tealDark hover:shadow-lift disabled:cursor-wait disabled:opacity-70"
-              >
-                {extracting ? "Analyzing" : "Log Observation"}
-                <ArrowRight size={18} />
-              </button>
-            </div>
+            ))}
+            {attachments.attachments.map((attachment) => (
+              <AttachmentThumb
+                key={attachment.id}
+                attachment={attachment}
+                onRemove={() => attachments.remove(attachment.id)}
+                onOpen={(rect) => setActivePreview({ attachment, rect })}
+                registerRef={() => undefined}
+              />
+            ))}
           </div>
         )}
+
+        {attachments.uploadError && <p role="alert" className="text-xs font-semibold text-rose-200">{attachments.uploadError}</p>}
+
+        <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2">
+          <div className="flex min-w-0 items-center gap-1.5" aria-live="polite">
+            {voice.listening && (
+              <>
+                <span className="flex h-5 items-center gap-1 px-1" aria-hidden="true">
+                  {WAVE_DURATIONS.map((duration, index) => (
+                    <span
+                      key={duration + index}
+                      className={`h-1 w-1 rounded-full ${index % 2 ? "bg-glow" : "bg-glow/80"} ${voice.capturing ? "waveform-bar" : ""}`}
+                      style={voice.capturing ? { animationDuration: duration } : undefined}
+                    />
+                  ))}
+                </span>
+                <span className="truncate text-[11px] font-semibold tracking-wide text-mist">
+                  {voice.capturing ? "Listening..." : "Waiting for microphone..."}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {allowAttachments && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={attachments.uploading || attachments.full}
+                className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-[11px] font-semibold text-white/80 transition hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ImagePlus size={13} />
+                {attachments.uploading ? "Uploading" : "Photo"}
+              </button>
+            )}
+            {symptomTagOptions.length > 0 && (
+              <button
+                ref={tagsButtonRef}
+                type="button"
+                onClick={() => setTagPickerOpen((open) => !open)}
+                className={`inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1 text-[11px] font-semibold transition active:scale-95 ${
+                  tagPickerOpen ? "bg-white/20 text-white" : "bg-white/10 text-white/80 hover:text-white"
+                }`}
+              >
+                <Plus size={13} />
+                Tags
+              </button>
+            )}
+            {tagPickerOpen && (
+              <TagPickerPortal
+                anchorRef={tagsButtonRef}
+                options={symptomTagOptions}
+                selected={tags}
+                onToggle={onToggleTag}
+                onClose={() => setTagPickerOpen(false)}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={extracting || !hasContent}
+          className="group inline-flex items-center gap-2 rounded-2xl border border-glow/30 bg-tealDark px-5 py-3 text-xs font-bold tracking-tight text-white shadow-lg shadow-black/20 transition-all enabled:hover:bg-leaf enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+        >
+          {extracting ? "Analyzing" : "Log Observation"}
+          <ArrowRight size={16} strokeWidth={2.5} className="text-mist transition-transform group-hover:translate-x-0.5" />
+        </button>
       </div>
 
       {activePreview && (
-        <AttachmentGalleryModal
-          attachment={activePreview.attachment}
-          originRect={activePreview.rect}
-          onClose={() => setActivePreview(null)}
-        />
+        <AttachmentGalleryModal attachment={activePreview.attachment} originRect={activePreview.rect} onClose={() => setActivePreview(null)} />
       )}
     </div>
   );

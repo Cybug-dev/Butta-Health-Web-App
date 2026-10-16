@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmModal } from "../components/capture/ConfirmModal";
 import { DashboardTopbar } from "../components/layout/DashboardTopbar";
 import { HeaderBand } from "../components/layout/HeaderBand";
@@ -69,10 +69,13 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
     observationRef.current = capture.observation;
   }, [capture.observation]);
   const { setObservation } = capture;
+  const [voiceUsed, setVoiceUsed] = useState(false);
   const appendToObservation = useCallback((text: string) => {
     observationRef.current = appendDictation(observationRef.current, text);
     setObservation(observationRef.current);
+    setVoiceUsed(true);
   }, [setObservation]);
+  if (voiceUsed && !capture.observation.trim()) setVoiceUsed(false);
   const voiceNote = useDictation(appendToObservation);
   const { listening: voiceListening, stop: stopVoiceNote } = voiceNote;
 
@@ -125,7 +128,7 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                     <button type="button" onClick={reload} className="self-start rounded border border-rust/30 bg-white px-3 py-2 text-xs font-extrabold sm:self-auto">Try again</button>
                   </div>
                 )}
-                {activeView !== "dashboard" && activeView !== "profile" && activeView !== "settings" && <HeaderBand metrics={metrics} />}
+                {!["dashboard", "profile", "settings", "capture"].includes(activeView) && <HeaderBand metrics={metrics} />}
                 {activeView === "dashboard" && (
                   <DashboardPage
                     user={user}
@@ -168,9 +171,10 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                     aiConsent={aiConsent}
                     onEnableAiCapture={() => void saveAiConsent(true)}
                     records={records}
+                    metrics={metrics}
                     isDemo={Boolean(user.demo)}
-                    voiceListening={voiceNote.listening}
-                    onStopVoice={voiceNote.stop}
+                    voice={voiceNote}
+                    source={voiceUsed ? "Voice" : "Typed"}
                   />
                 )}
                 {activeView === "timeline" && (

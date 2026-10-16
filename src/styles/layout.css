@@ -24,4 +24,9 @@
   .view-panel div {
     max-width: 100%;
   }
+
+  /* Edge-to-edge scroll rows use negative margins, so they must exceed 100%. */
+  .view-panel .scroll-row {
+    max-width: none;
+  }
 }
