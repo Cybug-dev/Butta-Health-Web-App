@@ -244,9 +244,9 @@ export function ProfilePage({
             <button
               type="button"
               onClick={() => setComingSoon(COMING_SOON.quickAdd)}
-              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-teal px-3 py-1.5 text-[11px] font-medium leading-[14px] tracking-[0.03em] text-white shadow-sm transition hover:bg-tealDark active:scale-95"
+              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-teal px-2.5 py-1 text-[10px] font-semibold leading-[14px] text-white shadow-sm transition hover:bg-tealDark active:scale-95"
             >
-              <Plus size={15} /> Quick add
+              <Plus size={12} /> Quick add
             </button>
           }
         >
@@ -261,8 +261,8 @@ export function ProfilePage({
               <MedicationList items={draft.currentMedications} onChange={(items) => setList("currentMedications", items)} />
             </ClinicalCategory>
           </div>
-          <p className="flex items-center gap-2 text-xs text-muted">
-            <Lightbulb size={16} className="shrink-0 text-teal" />
+          <p className="flex items-center gap-2 text-[11px] leading-4 text-muted">
+            <Lightbulb size={14} className="shrink-0 text-teal" />
             Missing something? Add newly prescribed medications or seasonal allergies to any category above.
           </p>
         </ProfileSection>
@@ -399,18 +399,18 @@ function ProfileSection({
       <div className={subtitle ? "space-y-2 border-b border-line pb-4" : undefined}>
         {/* Title row wraps the aside below once the title needs the room. */}
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <span className="flex min-w-[12rem] flex-1 items-center gap-3">
-            <span className={`grid shrink-0 place-items-center rounded-full ${subtitle ? "h-9 w-9 bg-mist text-teal" : "h-8 w-8 bg-well text-leaf"}`}>
-              <Icon size={17} />
+          <span className="flex flex-1 items-center gap-2">
+            <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${subtitle ? "bg-mist text-teal" : "bg-well text-leaf"}`}>
+              <Icon size={14} />
             </span>
-            <span className="flex min-w-0 flex-wrap items-center gap-2">
-              <h2 className="text-base font-semibold leading-6 text-ink">{title}</h2>
-              {tag && <span className="whitespace-nowrap rounded-full bg-well px-2 py-0.5 text-[11px] font-semibold leading-[14px] tracking-[0.03em] text-teal">{tag}</span>}
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h2 className="whitespace-nowrap max-[359px]:whitespace-normal text-sm font-semibold leading-5 text-ink">{title}</h2>
+              {tag && <span className="whitespace-nowrap rounded-full bg-well px-1.5 py-px text-[10px] font-semibold leading-[14px] text-teal">{tag}</span>}
             </span>
           </span>
           {aside}
         </div>
-        {subtitle && <p className="text-[13px] leading-[18px] text-muted">{subtitle}</p>}
+        {subtitle && <p className="text-xs leading-[18px] text-muted">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -443,15 +443,15 @@ function IconField({ label, icon: Icon, className = "", children }: { label: str
 
 function ClinicalCategory({ icon: Icon, title, count, className = "", children }: { icon: LucideIcon; title: string; count: string; className?: string; children: ReactNode }) {
   return (
-    <div className={`space-y-2.5 rounded-xl bg-field p-3.5 ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-mist text-teal">
-            <Icon size={15} />
+    <div className={`space-y-2 rounded-xl bg-field p-3 ${className}`}>
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+        <span className="flex flex-1 items-center gap-1.5">
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-mist text-teal">
+            <Icon size={11} />
           </span>
-          <span className="min-w-0 text-sm font-semibold leading-5 text-ink">{title}</span>
+          <span className="whitespace-nowrap max-[359px]:whitespace-normal text-[13px] font-semibold leading-5 text-ink">{title}</span>
         </span>
-        <span className="shrink-0 whitespace-nowrap rounded-full bg-well px-2 py-0.5 text-[11px] font-medium leading-[14px] tracking-[0.03em] text-teal">{count}</span>
+        <span className="shrink-0 whitespace-nowrap rounded-full bg-well px-1.5 py-px text-[10px] font-medium leading-[14px] text-teal">{count}</span>
       </div>
       {children}
     </div>
@@ -487,7 +487,7 @@ function InlineAdd({ label, onAdd, full = false }: { label: string; onAdd: (valu
         }}
         placeholder={label}
         aria-label={label}
-        className={`field-input h-8 min-w-0 rounded-lg px-3 text-[13px] ${full ? "w-full" : "w-full max-w-[14rem]"}`}
+        className={`field-input h-7 min-w-0 rounded-lg px-2.5 text-xs ${full ? "w-full" : "w-full max-w-[14rem]"}`}
       />
     );
   }
@@ -495,9 +495,9 @@ function InlineAdd({ label, onAdd, full = false }: { label: string; onAdd: (valu
     <button
       type="button"
       onClick={() => setAdding(true)}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-teal/40 px-3 text-[11px] font-medium leading-[14px] tracking-[0.03em] text-teal transition hover:bg-mist active:scale-95 ${full ? "w-full py-2" : "py-1.5"}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-teal/40 px-2.5 text-[10px] font-semibold leading-[14px] text-teal transition hover:bg-mist active:scale-95 ${full ? "w-full py-1.5" : "py-1"}`}
     >
-      <Plus size={15} /> {label}
+      <Plus size={12} /> {label}
     </button>
   );
 }
@@ -510,13 +510,13 @@ function ChipList({ addLabel, dot, items, onChange }: { addLabel: string; dot: s
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-1.5">
       {chips.map((item) => (
-        <span key={item} className="inline-flex max-w-full items-center gap-2 rounded-lg border border-line bg-white py-1.5 pl-3 pr-1.5 text-[13px] leading-[18px] text-ink shadow-sm">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
+        <span key={item} className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line bg-white py-1 pl-2.5 pr-1 text-xs leading-4 text-ink shadow-sm">
+          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
           <span className="min-w-0 break-words font-semibold">{item}</span>
-          <button type="button" onClick={() => onChange(chips.filter((chip) => chip !== item))} aria-label={`Remove ${item}`} className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-faint transition hover:text-rose-500">
-            <X size={14} />
+          <button type="button" onClick={() => onChange(chips.filter((chip) => chip !== item))} aria-label={`Remove ${item}`} className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-faint transition hover:text-rose-500">
+            <X size={12} />
           </button>
         </span>
       ))}
@@ -547,10 +547,10 @@ function MedicationList({ items, onChange }: { items: string[]; onChange: (items
       {medications.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),1fr))] gap-2">
           {medications.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center gap-3 rounded-lg border border-line bg-white p-3 shadow-sm">
-              <span className="flex min-w-0 flex-1 items-center gap-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-mist text-teal">
-                  <Pill size={17} />
+            <div key={`${item}-${index}`} className="flex items-center gap-2.5 rounded-lg border border-line bg-white p-2.5 shadow-sm">
+              <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-mist text-teal">
+                  <Pill size={14} />
                 </span>
                 {editing === index ? (
                   <input
@@ -565,21 +565,21 @@ function MedicationList({ items, onChange }: { items: string[]; onChange: (items
                       } else if (event.key === "Escape") setEditing(null);
                     }}
                     aria-label="Edit medication"
-                    className="field-input h-9 w-full min-w-0 rounded-lg px-3 text-[13px]"
+                    className="field-input h-8 w-full min-w-0 rounded-lg px-2.5 text-xs"
                   />
                 ) : (
                   <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="min-w-0 break-words text-[15px] font-semibold leading-6 text-ink">{item}</span>
-                    <span className="shrink-0 rounded bg-mist px-1.5 py-0.5 text-[11px] font-semibold leading-[14px] text-leaf">Active</span>
+                    <span className="min-w-0 break-words text-[13px] font-semibold leading-5 text-ink">{item}</span>
+                    <span className="shrink-0 rounded bg-mist px-1.5 py-px text-[10px] font-semibold leading-[14px] text-leaf">Active</span>
                   </span>
                 )}
               </span>
               <span className="flex shrink-0 items-center self-center">
-                <button type="button" onClick={() => startEdit(index)} aria-label={`Edit ${item}`} className="grid h-8 w-8 place-items-center rounded-full text-faint transition hover:text-teal">
-                  <Pencil size={17} />
+                <button type="button" onClick={() => startEdit(index)} aria-label={`Edit ${item}`} className="grid h-7 w-7 place-items-center rounded-full text-faint transition hover:text-teal">
+                  <Pencil size={14} />
                 </button>
-                <button type="button" onClick={() => onChange(medications.filter((_, i) => i !== index))} aria-label={`Remove ${item}`} className="grid h-8 w-8 place-items-center rounded-full text-faint transition hover:text-rose-500">
-                  <X size={17} />
+                <button type="button" onClick={() => onChange(medications.filter((_, i) => i !== index))} aria-label={`Remove ${item}`} className="grid h-7 w-7 place-items-center rounded-full text-faint transition hover:text-rose-500">
+                  <X size={14} />
                 </button>
               </span>
             </div>

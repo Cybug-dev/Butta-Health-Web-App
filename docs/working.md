@@ -8,6 +8,11 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 
 ## Current / latest
 
+**Git rule (2026-10-17):** do NOT commit or push unless the user explicitly asks. No Co-Authored-By trailers ever.
+
+### 2026-10-17 — Profile clinical context shrunk (UNCOMMITTED)
+Section headers: 28px icon/14px glyph, 14px semibold title, 10px tag, 12px subtitle, 10px Quick add. Categories: p-3, 20px icon/11px glyph, 13px title, 10px count. Chips 12px py-1, add buttons 10px, medication name 13px, 28px action buttons, tip 11px. Titles `whitespace-nowrap max-[359px]:whitespace-normal`; title blocks have no `min-w-0` so badges/buttons wrap below instead of overlapping. Applies to all ProfileSection headers.
+
 ### 2026-10-17 — Scrollbars hidden, clickable stat cards, saved visit notes
 - `styles/base.css`: scrollbars hidden app-wide (`* { scrollbar-width: none }` + webkit), scrolling unchanged.
 - Stat cards (`HeaderBand`) are buttons via `StatNavigationContext` (`components/layout/statNavigation.ts`, provided in HealthWorkspace `openStat`): Structured records / Timeline status → History (all), Symptom events → History filtered to Symptom, Watch items → History "Needs attention only" (new `watchOnly` in `useRecordFilters`, dismissible amber chip on HistoryPage). Search is cleared on open.
