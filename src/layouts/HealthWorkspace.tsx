@@ -121,7 +121,7 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
               ref={viewRef}
               className={`min-w-0 px-4 py-4 sm:px-6 lg:px-8 lg:py-7 ${activeView === "dashboard" ? "xl:pr-[348px]" : showInsightRail ? "2xl:pr-[348px]" : ""}`}
             >
-              <div className={`view-panel mx-auto w-full min-w-0 overflow-visible ${activeView === "dashboard" ? "max-w-[1240px]" : "max-w-5xl"}`}>
+              <div className={`view-panel mx-auto w-full min-w-0 overflow-visible ${activeView === "dashboard" ? "max-w-[1240px]" : activeView === "profile" ? "max-w-[1600px]" : "max-w-5xl"}`}>
                 {recordsError && (
                   <div role="alert" className="mb-5 flex flex-col gap-3 rounded-lg border border-rust/25 bg-rust/5 px-4 py-3 text-sm font-semibold text-rust sm:flex-row sm:items-center sm:justify-between">
                     <span>{recordsError}</span>
