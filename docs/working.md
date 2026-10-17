@@ -8,6 +8,13 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 
 ## Current / latest
 
+### 2026-10-17 — Doctor Visit Prep rebuilt from Stitch `de9e915c5c704dc7be34335537b91c96`
+**User rule:** follow Stitch *structure* only; use the app's existing tokens/colours (no new tokens), the home-screen search bar markup (`field-input w-full py-3 pl-10 pr-4 text-xs`, Search 16 text-muted), and leave `HeaderBand` untouched. Fully responsive, no squashed text.
+**Done (tsc -b + eslint pass; NOT visually verified):** `pages/DoctorPrepPage.tsx` — hero (Visit planner kicker, Select recent five / symptoms / Clear, Generate summary disabled until something is selected), `HeaderBand` under hero, local search + filter chips with counts (All / Selected / types), selectable cards (checkbox, title wraps, level chip = severity or status, date, note, type + source chips; selected = teal border + mist), Questions for your doctor (coming soon), Summary format (PDF = real via summary print; clinic file / private link → coming soon), sticky bottom "N entries ready" bar → summary. `Chip` extracted to `components/ui/Chip.tsx` (TimelineCard uses it). Doctor-prep excluded from global HeaderBand, uses `max-w-[1600px]`.
+**Next:** visually check Doctor Prep (sticky bar sits above mobile nav at `bottom-[5.5rem]`).
+
+---
+
 ### 2026-10-17 — Settings rebuilt from Stitch "Settings (Mobile)" `9ae186ddd1df4757b07534fbccde39a3`
 ("Settings (Web Mobile)" `9e9dfa0a…` is just a capture of the old app — ignore.)
 **Done (tsc -b + eslint pass; NOT visually verified):** `pages/SettingsPage.tsx` — header kicker, account card → profile (`onOpenProfile`), sections in a 2-col grid at lg: Smart note help (AI consent switch = real; term matching + strictness segmented → coming soon), Privacy & security (vault explainer → `HealthVaultModal`; face lock / clinics / access history → coming soon), Reminders (daily check-in w/ time, follow-ups, weekly summary = real; medication reminders → coming soon), Your data (export → coming soon; Reset demo for demo users), Sign out + Delete account (coming soon). Local `Switch`, `SettingRow`, `SettingsSection`. Dropped Stitch's AES/HIPAA/FHIR/version claims. Removed unused `SettingToggle`. Settings uses `max-w-[1600px]`.

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { HealthRecord, RecordType } from "../../types";
 import { severityStyles, statusStyles, typeLabels, typeStyles } from "../../constants/records";
 import { formatDate } from "../../utils/format";
+import { Chip } from "../ui/Chip";
 
 const typeIcons: Record<RecordType, LucideIcon> = {
   SYMPTOM: HeartPulse,
@@ -26,16 +27,6 @@ const levelEdge: Record<HealthRecord["severity"], string> = {
   Severe: "!border-l-4 !border-l-rust",
   "Not specified": "",
 };
-
-/** Small Stitch chip: sizes to its text and wraps with its siblings. */
-function Chip({ className, dot = false, children }: { className: string; dot?: boolean; children: string }) {
-  return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-1.5 py-px text-[10px] font-semibold leading-4 ${className}`}>
-      {dot && <span className="h-1 w-1 shrink-0 rounded-full bg-current" />}
-      {children}
-    </span>
-  );
-}
 
 export function TimelineCard({ record }: { record: HealthRecord }) {
   const [open, setOpen] = useState(false);
