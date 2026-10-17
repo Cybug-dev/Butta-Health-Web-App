@@ -20,10 +20,10 @@ export function TextField({
 }) {
   return (
     <label className="block min-w-0">
-      <span className="text-sm font-extrabold text-ink">{label}</span>
-      <span className="relative mt-2 block">
+      <span className="text-sm font-semibold text-ink">{label}</span>
+      <span className="relative mt-1.5 block">
         <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" size={18} />
-        <input type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} required={required} className="field-input h-12 w-full min-w-0 pl-11 pr-3 text-sm" placeholder={label} />
+        <input type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} required={required} className="field-input w-full min-w-0 py-3.5 pl-11 pr-3 text-sm" placeholder={label} />
       </span>
     </label>
   );

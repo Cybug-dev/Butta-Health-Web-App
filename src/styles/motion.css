@@ -30,14 +30,9 @@
 }
 
 .public-header.is-scrolled {
-  border-color: #dce6e2;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 30px rgba(27, 52, 45, 0.09);
-  backdrop-filter: blur(18px);
-}
-
-.public-header.is-scrolled .navbar-inner {
-  height: 4.25rem;
+  border-color: #e4ece6;
+  background: #fff;
+  box-shadow: 0 1px 8px rgba(27, 52, 45, 0.06);
 }
 
 .waveform-bar {

@@ -7,7 +7,8 @@ import {
   Mail,
   UserRound,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
+import { ComingSoonModal, type ComingSoonFeature } from "../../components/ui/ComingSoonModal";
 import { TextField } from "../../components/public/AuthFields";
 import { Brand } from "../../components/public/Brand";
 import { ApiError, type AppUser, buttaApi } from "../../services/api";
@@ -31,6 +32,8 @@ export function AuthPage({
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [comingSoon, setComingSoon] = useState<ComingSoonFeature | null>(null);
+  const closeComingSoon = useCallback(() => setComingSoon(null), []);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -76,22 +79,22 @@ export function AuthPage({
           </div>
         </section>
 
-        <section className="auth-right-section flex min-h-screen min-w-0 items-center justify-center bg-paper px-5 py-8 sm:px-8 lg:px-10 xl:px-16">
-          <div className="w-full max-w-[480px]">
-          <div className="auth-header mb-8 flex items-center justify-between lg:hidden">
+        <section className="auth-right-section flex min-h-screen min-w-0 items-center justify-center bg-paper px-5 py-6 sm:px-8 sm:py-10 lg:px-10 xl:px-16">
+          <div className="w-full max-w-md">
+          <div className="auth-header mb-6 flex items-center justify-between pt-1 lg:hidden">
             <Brand />
-            <button onClick={() => navigate("home")} className="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-muted" aria-label="Back to home"><ArrowLeft size={18} /></button>
+            <button type="button" onClick={() => navigate("home")} className="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-muted shadow-sm transition hover:border-teal/30 hover:text-teal active:scale-95" aria-label="Back to home"><ArrowLeft size={18} /></button>
           </div>
-          <div className="surface-card rounded-lg p-5 sm:p-8">
-            <div className="auth-form-content grid grid-cols-2 rounded-lg bg-well p-1">
-              <button onClick={() => navigate("signin")} className={`min-h-10 rounded-md text-sm font-extrabold transition ${!isSignUp ? "bg-white text-teal shadow-sm" : "text-muted"}`}>Sign in</button>
-              <button onClick={() => navigate("signup")} className={`min-h-10 rounded-md text-sm font-extrabold transition ${isSignUp ? "bg-white text-teal shadow-sm" : "text-muted"}`}>Create account</button>
+          <div className="surface-card rounded-3xl p-6 sm:p-8">
+            <div className="auth-form-content flex items-center rounded-2xl bg-well p-1.5">
+              <button type="button" onClick={() => navigate("signin")} className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${!isSignUp ? "bg-white text-teal shadow-sm" : "text-muted hover:text-teal"}`}>Sign in</button>
+              <button type="button" onClick={() => navigate("signup")} className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${isSignUp ? "bg-white text-teal shadow-sm" : "text-muted hover:text-teal"}`}>Create account</button>
             </div>
 
-            <div className="auth-form-content mt-7">
-              <span className="badge border border-teal/15 bg-teal/10 text-teal"><span className="badge-dot" /><span>{isSignUp ? "Begin your health story" : "Welcome back"}</span></span>
-              <h1 className="mt-4 text-3xl font-extrabold leading-tight">{isSignUp ? "Create your account" : "Sign in to Butta Health"}</h1>
-              <p className="mt-2 text-sm font-semibold leading-6 text-muted">{isSignUp ? "A few details, then we will personalize your profile." : "Continue building a clear record of how you feel."}</p>
+            <div className="auth-form-content mt-6">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-mist px-3 py-1 text-xs font-semibold tracking-wide text-teal"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal" />{isSignUp ? "Begin your health story" : "Welcome back"}</span>
+              <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">{isSignUp ? "Create your account" : "Sign in to Butta Health"}</h1>
+              <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">{isSignUp ? "A few details, then we will personalize your profile." : "Continue building a clear record of how you feel."}</p>
             </div>
 
             {notice && (
@@ -100,7 +103,7 @@ export function AuthPage({
               </div>
             )}
 
-            <form onSubmit={submit} className="auth-form-content mt-7 space-y-4">
+            <form onSubmit={submit} className="auth-form-content mt-6 space-y-4">
               {isSignUp && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <TextField label="First name" value={form.firstName} onChange={(value) => setForm({ ...form, firstName: value })} icon={UserRound} autoComplete="given-name" required />
@@ -109,8 +112,8 @@ export function AuthPage({
               )}
               <TextField label="Email address" type="email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} icon={Mail} autoComplete="email" required />
               <div className="block">
-                <label htmlFor="auth-password" className="text-sm font-extrabold text-ink">Password</label>
-                <span className="relative mt-2 block">
+                <label htmlFor="auth-password" className="text-sm font-semibold text-ink">Password</label>
+                <span className="relative mt-1.5 block">
                   <LockKeyhole className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" size={18} />
                   <input
                     id="auth-password"
@@ -119,7 +122,7 @@ export function AuthPage({
                     onChange={(event) => setForm({ ...form, password: event.target.value })}
                     autoComplete={isSignUp ? "new-password" : "current-password"}
                     required
-                    className="field-input h-12 w-full pl-11 pr-12 text-sm"
+                    className="field-input w-full py-3.5 pl-11 pr-12 text-sm"
                     placeholder={isSignUp ? "8 characters minimum" : "Enter your password"}
                   />
                   <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-1.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-md text-muted transition hover:bg-well hover:text-ink" aria-label={showPassword ? "Hide password" : "Show password"}>
@@ -130,8 +133,8 @@ export function AuthPage({
 
               {isSignUp && (
                 <div className="block">
-                  <label htmlFor="auth-confirm-password" className="text-sm font-extrabold text-ink">Confirm password</label>
-                  <span className="relative mt-2 block">
+                  <label htmlFor="auth-confirm-password" className="text-sm font-semibold text-ink">Confirm password</label>
+                  <span className="relative mt-1.5 block">
                     <LockKeyhole className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" size={18} />
                     <input
                       id="auth-confirm-password"
@@ -140,19 +143,27 @@ export function AuthPage({
                       onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
                       autoComplete="new-password"
                       required
-                      className="field-input h-12 w-full pl-11 pr-4 text-sm"
+                      className="field-input w-full py-3.5 pl-11 pr-4 text-sm"
                       placeholder="Re-enter your password"
                     />
                   </span>
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                <label className="inline-flex cursor-pointer items-center gap-2 font-bold text-muted">
+              <div className="flex flex-wrap items-center justify-between gap-3 py-1 text-sm">
+                <label className="inline-flex cursor-pointer items-center gap-2.5 font-medium text-ink">
                   <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="h-4 w-4 accent-teal" />
                   Remember me
                 </label>
-                {!isSignUp && <button type="button" className="font-extrabold text-teal hover:text-tealDark">Forgot password?</button>}
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => setComingSoon({ title: "Reset your password", description: "Get a secure link by email to choose a new password.", icon: LockKeyhole })}
+                    className="font-bold text-teal transition hover:text-tealDark"
+                  >
+                    Forgot password?
+                  </button>
+                )}
               </div>
 
               {error && (
@@ -162,18 +173,19 @@ export function AuthPage({
                 </div>
               )}
 
-              <button disabled={loading} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-teal px-5 font-extrabold text-white shadow-lift transition hover:bg-tealDark disabled:cursor-wait disabled:opacity-65">
+              <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-teal px-6 py-3.5 text-base font-semibold text-white shadow-md shadow-teal/20 transition enabled:hover:bg-tealDark enabled:active:scale-[0.98] disabled:cursor-wait disabled:opacity-65">
                 {loading ? "Please wait" : isSignUp ? "Create account" : "Sign in"}
                 {!loading && <ArrowRight size={18} />}
               </button>
             </form>
 
-            <div className="auth-form-content my-6 flex items-center gap-3 text-xs font-bold text-faint"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-            <button onClick={enterDemo} className="auth-form-content min-h-11 w-full rounded-lg border border-line bg-white text-sm font-extrabold text-muted transition hover:border-teal/30 hover:text-teal">Explore the prototype without an account</button>
+            <div className="auth-form-content my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-faint"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
+            <button type="button" onClick={enterDemo} className="auth-form-content w-full rounded-2xl border border-line bg-white px-4 py-3.5 text-sm font-semibold text-ink transition hover:border-teal/30 hover:text-teal active:scale-[0.98]">Explore the prototype without an account</button>
           </div>
 
-          <p className="auth-form-content mt-5 text-center text-xs font-semibold leading-5 text-faint">By continuing, you agree to Butta Health's terms and privacy notice.</p>
+          <p className="auth-form-content mt-6 text-center text-xs leading-5 text-faint">By continuing, you agree to Butta Health's terms and privacy notice.</p>
           </div>
+          <ComingSoonModal feature={comingSoon} onClose={closeComingSoon} />
       </section>
     </main>
   );
