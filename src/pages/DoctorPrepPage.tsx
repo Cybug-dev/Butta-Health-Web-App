@@ -70,7 +70,9 @@ export function DoctorPrepPage({
   const bundle = useMemo(() => {
     const counts = new Map<RecordType, number>();
     selected.forEach((record) => counts.set(record.type, (counts.get(record.type) ?? 0) + 1));
-    return [...counts].map(([type, count]) => `${count} ${typeLabels[type].toLowerCase()}`).join(", ");
+    return [...counts]
+      .map(([type, count]) => `${count} ${count === 1 || type === "DIGESTIVE" ? typeLabels[type] : `${typeLabels[type]}s`}`)
+      .join(", ");
   }, [selected]);
 
   function toggle(id: string) {
@@ -220,26 +222,30 @@ export function DoctorPrepPage({
       </div>
 
       {selected.length > 0 && (
-        <div className="sticky bottom-[5.5rem] z-30 lg:bottom-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-leaf p-3 pl-4 text-white shadow-float">
-            <span className="min-w-0">
-              <span className="block text-sm font-extrabold">
-                {selected.length} {selected.length === 1 ? "entry" : "entries"} ready
+        <aside className="sticky bottom-[4.5rem] z-30 pb-2 lg:bottom-4">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-ink bg-ink/95 p-2.5 pl-4 shadow-float backdrop-blur-md">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
               </span>
-              <span className="flex items-center gap-1.5 text-[11px] text-white/75">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-glow" />
-                <span>Includes {bundle}</span>
-              </span>
-            </span>
+              <div className="min-w-0 text-left">
+                <p className="text-xs font-bold leading-none text-white">
+                  {selected.length} {selected.length === 1 ? "record" : "records"} ready
+                </p>
+                <p className="mt-0.5 truncate text-[10px] text-faint">Aggregated bundle: {bundle}</p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => setActiveView("doctor-summary")}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/25 active:scale-95"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl bg-teal px-4 py-2 text-xs font-bold text-white shadow-md transition hover:bg-tealDark active:scale-95"
             >
-              View summary <ArrowRight size={15} />
+              Export Prep
+              <ArrowRight size={14} strokeWidth={2.5} />
             </button>
           </div>
-        </div>
+        </aside>
       )}
 
       <ComingSoonModal feature={comingSoon} onClose={closeComingSoon} />
