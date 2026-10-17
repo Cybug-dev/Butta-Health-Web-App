@@ -13,6 +13,8 @@ export function HistoryPage({
   setSearch,
   filter,
   setFilter,
+  watchOnly,
+  setWatchOnly,
   setActiveView,
 }: {
   records: HealthRecord[];
@@ -22,6 +24,8 @@ export function HistoryPage({
   setSearch: (value: string) => void;
   filter: RecordType | "ALL";
   setFilter: (value: RecordType | "ALL") => void;
+  watchOnly: boolean;
+  setWatchOnly: (value: boolean) => void;
   setActiveView: (view: ViewId) => void;
 }) {
   const [filtersOpen, setFiltersOpen] = useState(filter !== "ALL");
@@ -88,6 +92,17 @@ export function HistoryPage({
             <FileCheck2 size={15} /> Doctor visit prep
           </button>
         </div>
+
+        {watchOnly && (
+          <div className="relative mt-3 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 py-1 pl-3 pr-1 text-xs font-bold text-amber-700">
+              Needs attention only
+              <button type="button" onClick={() => setWatchOnly(false)} aria-label="Show all entries" className="grid h-5 w-5 place-items-center rounded-full transition hover:bg-amber-100">
+                <X size={12} />
+              </button>
+            </span>
+          </div>
+        )}
 
         {filtersOpen && (
           <div className="scroll-row relative -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1 sm:-mx-6 sm:flex-wrap sm:overflow-visible sm:px-6">

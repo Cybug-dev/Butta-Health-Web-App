@@ -5,6 +5,7 @@ import { HealthWorkspace } from "./layouts/HealthWorkspace";
 import { type AppUser, buttaApi, setSessionExpiredHandler } from "./services/api";
 import { DEMO_SESSION_KEY } from "./services/demoStorage";
 import { isWorkspacePath } from "./utils/routes";
+import { clearVisitNotes } from "./utils/visitNotes";
 
 function App() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -135,6 +136,7 @@ function App() {
   async function signOut() {
     if (user && !user.demo) await buttaApi.logout().catch(() => undefined);
     window.localStorage.removeItem(DEMO_SESSION_KEY);
+    clearVisitNotes();
     window.history.pushState({}, "", "/");
     setSessionNotice("");
     setUser(null);

@@ -58,22 +58,16 @@ select:focus-visible {
   color: #17211f;
 }
 
-::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+/* Scrollbars are hidden app-wide; everything still scrolls by touch, wheel and keyboard. */
+* {
+  scrollbar-width: none;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(47, 125, 105, 0.3);
-  border-radius: 999px;
+*::-webkit-scrollbar {
+  display: none;
 }
 
 .scroll-row {
-  scrollbar-width: none;
   scroll-snap-type: x proximity;
   overscroll-behavior-inline: contain;
-}
-
-.scroll-row::-webkit-scrollbar {
-  display: none;
 }

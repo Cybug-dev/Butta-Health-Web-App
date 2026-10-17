@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfirmModal } from "../components/capture/ConfirmModal";
 import { DashboardTopbar } from "../components/layout/DashboardTopbar";
 import { HeaderBand } from "../components/layout/HeaderBand";
+import { StatNavigationContext, type StatTarget } from "../components/layout/statNavigation";
 import { InsightRail, MobileInsightDrawer } from "../components/layout/InsightRail";
 import { MobileNav } from "../components/layout/MobileNav";
 import { MobileTopbar } from "../components/layout/MobileTopbar";
@@ -45,7 +46,7 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
     reload,
     addRecord,
   } = useHealthRecords(user);
-  const { search, setSearch, filter, setFilter, filteredRecords } = useRecordFilters(records);
+  const { search, setSearch, filter, setFilter, watchOnly, setWatchOnly, filteredRecords } = useRecordFilters(records);
   const { healthProfile, saveHealthProfile } = useHealthProfile(user, reload);
   const { aiConsent, saveAiConsent } = useAiConsent(user);
   const { checkInSaving, checkInError, respondToDailyCheckIn } = useDailyCheckIn({
@@ -85,7 +86,15 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
 
   const showInsightRail = ["capture", "timeline", "companion", "doctor-prep", "doctor-summary"].includes(activeView);
 
+  function openStat(target: StatTarget) {
+    setSearch("");
+    setFilter(target === "symptoms" ? "SYMPTOM" : "ALL");
+    setWatchOnly(target === "watch");
+    navigateView("timeline");
+  }
+
   return (
+    <StatNavigationContext.Provider value={openStat}>
     <div className="min-h-screen bg-paper text-ink">
       <div className="app-shell min-h-screen w-full">
         <Sidebar
@@ -186,6 +195,8 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                     setSearch={setSearch}
                     filter={filter}
                     setFilter={setFilter}
+                    watchOnly={watchOnly}
+                    setWatchOnly={setWatchOnly}
                     setActiveView={navigateView}
                   />
                 )}
@@ -250,5 +261,6 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
         />
       )}
     </div>
+    </StatNavigationContext.Provider>
   );
 }

@@ -8,6 +8,13 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 
 ## Current / latest
 
+### 2026-10-17 — Scrollbars hidden, clickable stat cards, saved visit notes
+- `styles/base.css`: scrollbars hidden app-wide (`* { scrollbar-width: none }` + webkit), scrolling unchanged.
+- Stat cards (`HeaderBand`) are buttons via `StatNavigationContext` (`components/layout/statNavigation.ts`, provided in HealthWorkspace `openStat`): Structured records / Timeline status → History (all), Symptom events → History filtered to Symptom, Watch items → History "Needs attention only" (new `watchOnly` in `useRecordFilters`, dismissible amber chip on HistoryPage). Search is cleared on open.
+- Doctor Summary visit notes persist in localStorage via `utils/visitNotes.ts` (`butta.doctorVisitNotes`), cleared on sign out in `App.tsx`.
+
+---
+
 ### 2026-10-17 — Doctor Summary rebuilt from Stitch "Clinical Snapshot" `d49957cc2dd8407d8e927bea7355fedb`
 **Done (tsc -b + eslint pass; NOT visually verified):** `pages/DoctorSummaryPage.tsx` — hero (For your doctor kicker, Print = real `window.print`, Export + Share/Copy link → coming soon), existing `HeaderBand` under the hero (hidden in print), Main concern card (chief complaint, frequency, real profile facts from `healthProfile`: blood group/allergies/conditions/meds, amber "Please note"), Selected timeline (count, newest/oldest, newest item teal left edge, note box italic+quoted for voice, type chip + Needs attention + source), Visit notes textarea (local only, prints). lg: concern + timeline side by side. New props `profile`, `metrics`; summary excluded from global HeaderBand, `max-w-[1600px]`. Dropped FHIR/256-bit/SHA/ID claims; old `ReportBlock` export removed (unused).
 **Next:** visually check Doctor Summary + print preview.

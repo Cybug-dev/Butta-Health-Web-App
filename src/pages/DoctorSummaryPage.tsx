@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowDownUp, Download, NotebookPen, Printer, Share2 } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { HeaderBand } from "../components/layout/HeaderBand";
 import { Chip } from "../components/ui/Chip";
 import { ComingSoonModal, type ComingSoonFeature } from "../components/ui/ComingSoonModal";
@@ -7,6 +7,7 @@ import { statusStyles, typeLabels, typeStyles } from "../constants/records";
 import type { HealthProfile } from "../services/api";
 import type { DoctorSummary, HealthRecord } from "../types";
 import { formatDate } from "../utils/format";
+import { readVisitNotes, writeVisitNotes } from "../utils/visitNotes";
 
 const SOURCE_LABELS: Record<HealthRecord["source"], string> = { Typed: "Typed entry", Voice: "Voice note", Preset: "Quick log" };
 
@@ -28,7 +29,12 @@ export function DoctorSummaryPage({
 }) {
   const [comingSoon, setComingSoon] = useState<ComingSoonFeature | null>(null);
   const closeComingSoon = useCallback(() => setComingSoon(null), []);
-  const [visitNotes, setVisitNotes] = useState("");
+  const [visitNotes, setVisitNotes] = useState(readVisitNotes);
+
+  // Keep visit notes in this browser so they survive leaving the page.
+  useEffect(() => {
+    writeVisitNotes(visitNotes);
+  }, [visitNotes]);
   const [newestFirst, setNewestFirst] = useState(true);
 
   const records = [...(summary?.records || selectedRecords)].sort((a, b) => {
@@ -181,7 +187,7 @@ export function DoctorSummaryPage({
           aria-label="Visit notes"
           className="field-input w-full resize-y p-3 text-xs"
         />
-        <p className="text-[10px] text-muted print:hidden">These notes aren't saved. They stay on this page until you leave it.</p>
+        <p className="text-[10px] text-muted print:hidden">Saved on this device only, so they're here next time you open your summary.</p>
       </section>
 
       <ComingSoonModal feature={comingSoon} onClose={closeComingSoon} />
