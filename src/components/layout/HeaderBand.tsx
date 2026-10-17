@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 export function HeaderBand({ metrics, className = "mb-5" }: { metrics: { monitoring: number; symptoms: number; records: number }; className?: string }) {
   return (
-    <div className={`scroll-row -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 ${className}`}>
+    <div className={`scroll-row -mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 ${className}`}>
       <Metric icon={FileCheck2} tone="teal" label="Structured records" value={String(metrics.records)} footer="Ready for review" indicator={<span className="h-2 w-2 rounded-full bg-teal" />} />
       <Metric icon={Activity} tone="teal" label="Timeline status" value="Active sync" compact footer="Auto-encrypted" indicator={<Check size={14} strokeWidth={2.4} className="text-teal" />} />
       <Metric icon={HeartPulse} tone="rose" label="Symptom events" value={String(metrics.symptoms)} footer="Timeline ready" indicator={<span className="h-2 w-2 rounded-full bg-rose-400" />} />

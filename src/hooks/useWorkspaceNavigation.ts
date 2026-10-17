@@ -15,6 +15,11 @@ export function useWorkspaceNavigation() {
     setInsightRailOpen(false);
   }
 
+  // Each screen opens at the top instead of keeping the previous screen's scroll position.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [activeView]);
+
   useEffect(() => {
     const currentPath = window.location.pathname;
     if (currentPath === "/app" || !Object.values(workspacePaths).includes(currentPath)) {

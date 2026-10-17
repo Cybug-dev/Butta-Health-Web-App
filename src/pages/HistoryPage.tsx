@@ -1,11 +1,14 @@
-import { FileCheck2, Search } from "lucide-react";
+import { ArrowDownUp, FileCheck2, Filter, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { TimelineCard } from "../components/history/TimelineCard";
+import { HeaderBand } from "../components/layout/HeaderBand";
 import { filters, typeLabels } from "../constants/records";
 import type { HealthRecord, RecordType, ViewId } from "../types";
 
 export function HistoryPage({
   records,
   rawCount,
+  metrics,
   search,
   setSearch,
   filter,
@@ -14,64 +17,124 @@ export function HistoryPage({
 }: {
   records: HealthRecord[];
   rawCount: number;
+  metrics: { monitoring: number; symptoms: number; records: number };
   search: string;
   setSearch: (value: string) => void;
   filter: RecordType | "ALL";
   setFilter: (value: RecordType | "ALL") => void;
   setActiveView: (view: ViewId) => void;
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(filter !== "ALL");
+  const [newestFirst, setNewestFirst] = useState(true);
+
+  const sorted = useMemo(
+    () =>
+      [...records].sort((a, b) => {
+        const diff = new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
+        return newestFirst ? diff : -diff;
+      }),
+    [records, newestFirst],
+  );
+
   return (
     <div className="space-y-5">
-      <section className="surface-card stagger-in rounded-lg p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">Longitudinal health record</p>
-            <h2 className="mt-2 font-serif text-4xl">Clinical timeline</h2>
-            <p className="mt-2 max-w-2xl text-muted">
-              Searchable, structured patient entries with category filtering and expandable doctor context.
+      <section className="surface-card stagger-in relative overflow-hidden rounded-3xl p-5 sm:p-6">
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 rounded-full bg-gradient-to-br from-teal/10 to-transparent blur-2xl" />
+
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-teal">
+              <span className="h-2 w-2 rounded-full bg-teal" /> Longitudinal health record
+            </p>
+            <h1 className="mt-1.5 text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-3xl">Clinical timeline</h1>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted">
+              Search and filter everything you've logged, and open any entry for the details a doctor would want.
             </p>
           </div>
-          <div className="relative min-w-0 lg:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" size={18} />
+          <div className="relative w-full min-w-0 lg:max-w-md">
+            <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="field-input h-12 w-full pl-10 pr-3 text-sm"
-              placeholder="Search records"
+              className="field-input h-12 w-full pl-10 pr-10 text-sm"
+              placeholder="Search records, symptoms, notes..."
+              aria-label="Search records"
             />
+            {search && (
+              <button type="button" onClick={() => setSearch("")} aria-label="Clear search" className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-faint transition hover:text-ink">
+                <X size={14} />
+              </button>
+            )}
           </div>
         </div>
-        <button type="button" onClick={() => setActiveView("doctor-prep")} className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-extrabold text-teal transition hover:border-teal/40 hover:bg-well">
-          <FileCheck2 size={17} />
-          Prepare for a doctor visit
-        </button>
-        <div className="scroll-row -mx-5 mt-5 flex gap-2 overflow-x-auto px-5 pb-1">
-          {filters.map((item) => (
-            <button
-              key={item}
-              onClick={() => setFilter(item)}
-              className={`min-h-10 shrink-0 rounded-full border px-4 text-xs font-extrabold transition ${
-                filter === item
-                  ? "border-teal bg-teal text-paper"
-                  : "border-line bg-paper text-muted hover:border-teal/40 hover:text-ink"
-              }`}
-            >
-              {item === "ALL" ? "All" : typeLabels[item]}
-            </button>
-          ))}
-        </div>
-      </section>
 
-      <div className="space-y-3">
-        {records.map((record) => (
-          <TimelineCard key={record.id} record={record} />
-        ))}
-        {!records.length && (
-          <div className="surface-card rounded-lg p-8 text-center text-muted">
-            No matching records found in {rawCount} entries.
+        <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((value) => !value)}
+            aria-expanded={filtersOpen}
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
+              filtersOpen || filter !== "ALL" ? "border-teal/40 bg-mist text-leaf" : "border-line bg-well text-leaf hover:bg-mist"
+            }`}
+          >
+            <Filter size={15} /> Filter entries
+            {filter !== "ALL" && <span className="rounded-full bg-teal px-1.5 text-[10px] text-white">1</span>}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("doctor-prep")}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-teal px-3.5 py-2 text-xs font-bold text-white shadow-lift transition hover:bg-tealDark active:scale-95"
+          >
+            <FileCheck2 size={15} /> Doctor visit prep
+          </button>
+        </div>
+
+        {filtersOpen && (
+          <div className="scroll-row relative -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1 sm:-mx-6 sm:flex-wrap sm:overflow-visible sm:px-6">
+            {filters.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setFilter(item)}
+                aria-pressed={filter === item}
+                className={`min-h-9 shrink-0 rounded-full border px-4 text-xs font-bold transition ${
+                  filter === item ? "border-teal bg-teal text-white" : "border-line bg-white text-muted hover:border-teal/40 hover:text-ink"
+                }`}
+              >
+                {item === "ALL" ? "All" : typeLabels[item]}
+              </button>
+            ))}
           </div>
         )}
-      </div>
+      </section>
+
+      <HeaderBand metrics={metrics} className="mb-0" />
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-leaf">Events &amp; observations</h2>
+            <span className="whitespace-nowrap rounded-full bg-well px-2 py-0.5 text-[11px] font-bold text-teal">
+              {records.length !== rawCount ? `${records.length} of ${rawCount}` : `${records.length} recent`}
+            </span>
+          </div>
+          <button type="button" onClick={() => setNewestFirst((value) => !value)} className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold text-teal hover:underline">
+            <ArrowDownUp size={13} /> {newestFirst ? "Newest first" : "Oldest first"}
+          </button>
+        </div>
+
+        {sorted.length ? (
+          <div className="grid items-start gap-3 xl:grid-cols-2">
+            {sorted.map((record) => (
+              <TimelineCard key={record.id} record={record} />
+            ))}
+          </div>
+        ) : (
+          <div className="surface-card rounded-2xl p-8 text-center text-sm text-muted">
+            {rawCount ? `No matching records found in ${rawCount} entries.` : "Nothing logged yet. Your events will show up here."}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
