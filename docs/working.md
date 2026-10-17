@@ -8,6 +8,12 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 
 ## Current / latest
 
+### 2026-10-17 — Doctor Summary rebuilt from Stitch "Clinical Snapshot" `d49957cc2dd8407d8e927bea7355fedb`
+**Done (tsc -b + eslint pass; NOT visually verified):** `pages/DoctorSummaryPage.tsx` — hero (For your doctor kicker, Print = real `window.print`, Export + Share/Copy link → coming soon), existing `HeaderBand` under the hero (hidden in print), Main concern card (chief complaint, frequency, real profile facts from `healthProfile`: blood group/allergies/conditions/meds, amber "Please note"), Selected timeline (count, newest/oldest, newest item teal left edge, note box italic+quoted for voice, type chip + Needs attention + source), Visit notes textarea (local only, prints). lg: concern + timeline side by side. New props `profile`, `metrics`; summary excluded from global HeaderBand, `max-w-[1600px]`. Dropped FHIR/256-bit/SHA/ID claims; old `ReportBlock` export removed (unused).
+**Next:** visually check Doctor Summary + print preview.
+
+---
+
 ### 2026-10-17 — Doctor Visit Prep rebuilt from Stitch `de9e915c5c704dc7be34335537b91c96`
 **User rule:** follow Stitch *structure* only; use the app's existing tokens/colours (no new tokens), the home-screen search bar markup (`field-input w-full py-3 pl-10 pr-4 text-xs`, Search 16 text-muted), and leave `HeaderBand` untouched. Fully responsive, no squashed text.
 **Done (tsc -b + eslint pass; NOT visually verified):** `pages/DoctorPrepPage.tsx` — hero (Visit planner kicker, Select recent five / symptoms / Clear, Generate summary disabled until something is selected), `HeaderBand` under hero, local search + filter chips with counts (All / Selected / types), selectable cards (checkbox, title wraps, level chip = severity or status, date, note, type + source chips; selected = teal border + mist), Questions for your doctor (coming soon), Summary format (PDF = real via summary print; clinic file / private link → coming soon), sticky bottom "N entries ready" bar → summary. `Chip` extracted to `components/ui/Chip.tsx` (TimelineCard uses it). Doctor-prep excluded from global HeaderBand, uses `max-w-[1600px]`.

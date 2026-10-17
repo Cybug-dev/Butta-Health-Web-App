@@ -121,14 +121,14 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
               ref={viewRef}
               className={`min-w-0 px-4 py-4 sm:px-6 lg:px-8 lg:py-7 ${activeView === "dashboard" ? "xl:pr-[348px]" : showInsightRail ? "2xl:pr-[348px]" : ""}`}
             >
-              <div className={`view-panel mx-auto w-full min-w-0 overflow-visible ${activeView === "dashboard" ? "max-w-[1240px]" : ["profile", "timeline", "settings", "doctor-prep"].includes(activeView) ? "max-w-[1600px]" : "max-w-5xl"}`}>
+              <div className={`view-panel mx-auto w-full min-w-0 overflow-visible ${activeView === "dashboard" ? "max-w-[1240px]" : ["profile", "timeline", "settings", "doctor-prep", "doctor-summary"].includes(activeView) ? "max-w-[1600px]" : "max-w-5xl"}`}>
                 {recordsError && (
                   <div role="alert" className="mb-5 flex flex-col gap-3 rounded-lg border border-rust/25 bg-rust/5 px-4 py-3 text-sm font-semibold text-rust sm:flex-row sm:items-center sm:justify-between">
                     <span>{recordsError}</span>
                     <button type="button" onClick={reload} className="self-start rounded border border-rust/30 bg-white px-3 py-2 text-xs font-extrabold sm:self-auto">Try again</button>
                   </div>
                 )}
-                {!["dashboard", "profile", "settings", "capture", "timeline", "doctor-prep"].includes(activeView) && <HeaderBand metrics={metrics} />}
+                {!["dashboard", "profile", "settings", "capture", "timeline", "doctor-prep", "doctor-summary"].includes(activeView) && <HeaderBand metrics={metrics} />}
                 {activeView === "dashboard" && (
                   <DashboardPage
                     user={user}
@@ -200,7 +200,7 @@ export function HealthWorkspace({ user, onSignOut }: { user: AppUser; onSignOut:
                   />
                 )}
                 {activeView === "doctor-summary" && (
-                  <DoctorSummaryPage summary={summary} selectedRecords={selectedRecords} />
+                  <DoctorSummaryPage summary={summary} selectedRecords={selectedRecords} profile={healthProfile} metrics={metrics} />
                 )}
                 {activeView === "settings" && (
                   <SettingsPage
