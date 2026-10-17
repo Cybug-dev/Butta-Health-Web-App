@@ -8,6 +8,13 @@ Running timeline of tasks worked on this project. New agents/sessions should rea
 
 ## Current / latest
 
+### 2026-10-17 — Settings rebuilt from Stitch "Settings (Mobile)" `9ae186ddd1df4757b07534fbccde39a3`
+("Settings (Web Mobile)" `9e9dfa0a…` is just a capture of the old app — ignore.)
+**Done (tsc -b + eslint pass; NOT visually verified):** `pages/SettingsPage.tsx` — header kicker, account card → profile (`onOpenProfile`), sections in a 2-col grid at lg: Smart note help (AI consent switch = real; term matching + strictness segmented → coming soon), Privacy & security (vault explainer → `HealthVaultModal`; face lock / clinics / access history → coming soon), Reminders (daily check-in w/ time, follow-ups, weekly summary = real; medication reminders → coming soon), Your data (export → coming soon; Reset demo for demo users), Sign out + Delete account (coming soon). Local `Switch`, `SettingRow`, `SettingsSection`. Dropped Stitch's AES/HIPAA/FHIR/version claims. Removed unused `SettingToggle`. Settings uses `max-w-[1600px]`.
+**Next:** visually check Settings.
+
+---
+
 ### 2026-10-17 — History (Clinical timeline) rebuilt from Stitch
 **Stitch access:** `stitch` MCP has no permission on the project; use `stitch-2`. Some screens' files are behind `stitch.googleapis.com/.../files/{id}:download` → header `X-Goog-Api-Key: $STITCH_API_KEY` (user env var; read it from the Windows user env if the session predates it). Response is JSON `{dataString}`: HTML raw, PNG base64. Others use public contribution.usercontent URLs. Screens: Health Profile `2a7df68b9cfa40f3a63f2ebcf892a9ca`, Clinical Timeline `58b0713ec8144612aa104808976ee698`.
 
