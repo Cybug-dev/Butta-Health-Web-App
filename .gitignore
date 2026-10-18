@@ -5,4 +5,5 @@ dist
 !public/**/*.png
 .env
 .env.*
+settings.local.json
 .playwright-mcp
