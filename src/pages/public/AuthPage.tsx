@@ -79,13 +79,13 @@ export function AuthPage({
           </div>
         </section>
 
-        <section className="auth-right-section flex min-h-screen min-w-0 items-center justify-center bg-paper px-5 py-6 sm:px-8 sm:py-10 lg:px-10 xl:px-16">
-          <div className="w-full max-w-md">
-          <div className="auth-header mb-6 flex items-center justify-between pt-1 lg:hidden">
+        <section className="auth-right-section flex min-h-screen min-w-0 items-center justify-center bg-paper px-3 py-5 sm:px-8 sm:py-10 lg:px-10 xl:px-16">
+          <div className="w-full max-w-md sm:max-w-lg">
+          <div className="auth-header mb-5 flex items-center justify-between gap-3 px-1 pt-1 lg:hidden">
             <Brand />
             <button type="button" onClick={() => navigate("home")} className="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-muted shadow-sm transition hover:border-teal/30 hover:text-teal active:scale-95" aria-label="Back to home"><ArrowLeft size={18} /></button>
           </div>
-          <div className="surface-card rounded-3xl p-6 sm:p-8">
+          <div className="surface-card rounded-3xl p-4 min-[400px]:p-5 sm:p-8">
             <div className="auth-form-content flex items-center rounded-2xl bg-well p-1.5">
               <button type="button" onClick={() => navigate("signin")} className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${!isSignUp ? "bg-white text-teal shadow-sm" : "text-muted hover:text-teal"}`}>Sign in</button>
               <button type="button" onClick={() => navigate("signup")} className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${isSignUp ? "bg-white text-teal shadow-sm" : "text-muted hover:text-teal"}`}>Create account</button>
