@@ -127,12 +127,9 @@ export function HistoryPage({
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-leaf">Events &amp; observations</h2>
-            <span className="whitespace-nowrap rounded-full bg-well px-2 py-0.5 text-[11px] font-bold text-teal">
-              {records.length !== rawCount ? `${records.length} of ${rawCount}` : `${records.length} recent`}
-            </span>
-          </div>
+          <h2 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-leaf">
+            Logged events ({records.length !== rawCount ? `${records.length} of ${rawCount}` : records.length})
+          </h2>
           <button type="button" onClick={() => setNewestFirst((value) => !value)} className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold text-teal hover:underline">
             <ArrowDownUp size={13} /> {newestFirst ? "Newest first" : "Oldest first"}
           </button>

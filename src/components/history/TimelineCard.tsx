@@ -51,22 +51,26 @@ export function TimelineCard({ record }: { record: HealthRecord }) {
           </span>
 
           <span className="mt-2 flex flex-wrap items-center gap-1">
-            <Chip dot className={typeStyles[record.type]}>{typeLabels[record.type]}</Chip>
-            {record.severity !== "Not specified" && <Chip dot className={severityStyles[record.severity]}>{record.severity}</Chip>}
-            <Chip className={statusStyles[record.status]}>{record.status}</Chip>
+            <Chip dot compact className={typeStyles[record.type]}>{typeLabels[record.type]}</Chip>
+            {record.severity !== "Not specified" && <Chip dot compact className={severityStyles[record.severity]}>{record.severity}</Chip>}
+            <Chip compact className={statusStyles[record.status]}>{record.status}</Chip>
           </span>
 
           {preview && !open && (
-            <span className="mt-2.5 flex items-center justify-between gap-2 rounded-xl border border-line bg-field px-2.5 py-2 text-xs text-muted">
-              <span className="truncate">{preview}</span>
+            <span className="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-field px-2.5 py-2 text-xs text-muted">
+              <span className="flex min-w-0 items-baseline italic">
+                <span aria-hidden="true">&quot;</span>
+                <span className="truncate">{preview}</span>
+                <span aria-hidden="true">&quot;</span>
+              </span>
               <span className="shrink-0 text-[10px] font-bold text-teal">Details →</span>
             </span>
           )}
 
-          <span className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-[11px]">
-            <span className="font-semibold text-muted">{formatDate(record.eventDate)}</span>
-            <span className="inline-flex items-center gap-1 rounded-md bg-well px-2 py-0.5 font-semibold text-muted">
-              <SourceIcon size={12} /> {source.label}
+          <span className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2">
+            <span className="text-[10px] font-medium text-faint sm:text-[11px]">{formatDate(record.eventDate)}</span>
+            <span className="inline-flex items-center gap-1 rounded-md bg-well px-1.5 py-px text-[9px] font-medium text-muted sm:text-[10px]">
+              <SourceIcon size={10} /> {source.label}
             </span>
           </span>
         </span>
