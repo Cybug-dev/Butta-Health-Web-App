@@ -61,14 +61,14 @@ export function LandingPage({
             >
               <Brand />
             </a>
-            <nav aria-label="Account" className="flex shrink-0 items-center gap-2 sm:gap-3">
-              <button type="button" onClick={() => navigate("signin")} className="inline-flex items-center rounded-full px-2.5 py-2 text-sm font-semibold text-muted transition-colors hover:text-teal sm:px-4">
+            <nav aria-label="Account" className="flex shrink-0 items-center gap-2">
+              <button type="button" onClick={() => navigate("signin")} className="inline-flex items-center px-2 py-1 text-xs font-medium text-muted transition-colors hover:text-teal">
                 Sign in
               </button>
               <button
                 type="button"
                 onClick={() => navigate("signup")}
-                className="inline-flex items-center justify-center rounded-full bg-teal px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-tealDark hover:shadow active:scale-95 sm:px-5"
+                className="inline-flex items-center justify-center rounded-full bg-teal px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-tealDark hover:shadow active:scale-95"
               >
                 Get started
               </button>
@@ -82,7 +82,7 @@ export function LandingPage({
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal" /> Health clarity, one moment at a time
             </span>
             <p className="hero-copy-item mt-6 text-base font-bold tracking-tight text-teal lg:mt-4">Better health today.</p>
-            <h1 className="hero-copy-item mt-1 text-[clamp(2.75rem,5.4vw,5rem)] font-extrabold uppercase leading-[1] tracking-tight text-ink lg:text-[clamp(2.75rem,min(5.4vw,10svh),5rem)]">
+            <h1 className="hero-copy-item mt-1 text-[clamp(2.75rem,5.4vw,5rem)] font-extrabold capitalize leading-[1.18] tracking-tight text-ink lg:text-[clamp(2.75rem,min(5.4vw,9.5svh),5rem)]">
               A brighter
               <br />
               <span className="text-teal">tomorrow.</span>
